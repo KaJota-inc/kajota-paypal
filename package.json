@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "reproduce": "tsx scripts/reproduce-paypal-mesh-flow.ts"
+    "reproduce": "tsx scripts/reproduce-paypal-mesh-flow.ts",
+    "reproduce:fail": "tsx scripts/fail/_runner.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.83",

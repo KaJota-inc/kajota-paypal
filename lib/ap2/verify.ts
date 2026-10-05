@@ -10,7 +10,11 @@ import { cartMandateHash } from "./hash";
 
 export type VerificationResult<T> =
   | { ok: true; value: T }
-  | { ok: false; reason: string; stage: "schema" | "signature" | "hash" | "mandate-cross-ref" };
+  | {
+      ok: false;
+      reason: string;
+      stage: "schema" | "signature" | "hash" | "mandate-cross-ref" | "expiry";
+    };
 
 /**
  * Verify an AP2 Cart Mandate.
@@ -65,6 +69,25 @@ export async function verifyCartMandate(
       ok: false,
       reason: `cart_hash mismatch: payload=${parsedPayload.data.cart_hash}, canonical=${expectedHash}`,
       stage: "hash",
+    };
+  }
+
+  // The JWT envelope has its own iat/exp — enforced by jwtVerify above —
+  // but AP2 CartContents carries a separate `cart_expiry` for the cart
+  // itself. A valid-JWT / expired-cart pairing is a real attack surface.
+  const cartExpiry = Date.parse(cart.contents.cart_expiry);
+  if (Number.isNaN(cartExpiry)) {
+    return {
+      ok: false,
+      reason: "cart_expiry is not a valid ISO 8601 timestamp",
+      stage: "schema",
+    };
+  }
+  if (cartExpiry < Date.now()) {
+    return {
+      ok: false,
+      reason: `cart_expiry ${cart.contents.cart_expiry} is in the past`,
+      stage: "expiry",
     };
   }
 
