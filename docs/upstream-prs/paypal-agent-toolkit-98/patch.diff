@@ -1,0 +1,93 @@
+diff --git a/typescript/src/shared/client.ts b/typescript/src/shared/client.ts
+--- a/typescript/src/shared/client.ts
++++ b/typescript/src/shared/client.ts
+@@ -108,7 +108,16 @@ class PayPalClient {
+     }
+
+     // Helper method to get headers
+-    async getHeaders(): Promise<Record<string, string>> {
++    async getHeaders(overrides?: {
++        /**
++         * Per-call override for `PayPal-Request-Id`. Wins over the
++         * per-client `_context.request_id` set in the constructor.
++         *
++         * Must be stable across retries of the same purchase and distinct
++         * between different purchases.
++         */
++        requestId?: string;
++    }): Promise<Record<string, string>> {
+         const headers: Record<string, string> = {
+             'Content-Type': 'application/json',
+         };
+@@ -117,8 +126,12 @@ class PayPalClient {
+         headers['Authorization'] = `Bearer ${this._accessToken}`;
+
+         // Add additional headers if needed
+-        if (this._context.request_id) {
+-            headers['PayPal-Request-Id'] = this._context.request_id;
++        //
++        // Per-call `requestId` wins over per-client `request_id`, so an
++        // integrator can give each `create_order` / `capture_order` its own
++        // idempotency key without changing the client-wide default.
++        const requestId = overrides?.requestId ?? this._context.request_id;
++        if (requestId) {
++            headers['PayPal-Request-Id'] = requestId;
+         }
+
+         if (this._context.tenant_context) {
+diff --git a/typescript/src/shared/parameters.ts b/typescript/src/shared/parameters.ts
+--- a/typescript/src/shared/parameters.ts
++++ b/typescript/src/shared/parameters.ts
+@@ -535,7 +535,15 @@ export const createOrderParameters = (context: Context) => z.object({
+   shippingAddress: z.optional(shippingAddress.nullable()).default(null).describe('The shipping address for the order.'),
+   notes: z.string().optional().nullable().default(null),
+   returnUrl: z.string().optional().default('https://example.com/returnUrl'),
+-  cancelUrl: z.string().optional().default('https://example.com/cancelUrl')
++  cancelUrl: z.string().optional().default('https://example.com/cancelUrl'),
++  request_id: z.string().optional().describe(
++    'Optional idempotency key sent as `PayPal-Request-Id`. ' +
++    'Must be STABLE across retries of the same purchase and DISTINCT between ' +
++    'different purchases. Omit to fall back to the client-level `request_id` ' +
++    '(or no header if that is also unset). ' +
++    'See https://developer.paypal.com/api/rest/reference/idempotency/.'
++  )
+ });
+
+ export const getOrderParameters = (context: Context) => z.object({
+@@ -544,6 +552,13 @@ export const getOrderParameters = (context: Context) => z.object({
+
+ export const captureOrderParameters = (context: Context) => z.object({
+   id: z.string().regex(ORDER_ID_REGEX, "Invalid PayPal Order ID").describe('The order id generated during create call'),
++  request_id: z.string().optional().describe(
++    'Optional idempotency key sent as `PayPal-Request-Id`. ' +
++    'If omitted, defaults to the order `id`, so a retried capture of the same ' +
++    'order is safely deduped by PayPal. Supply an explicit value if your ' +
++    'retry policy needs a different key.'
++  )
+ });
+
+ // === Disputes Parameters ===
+diff --git a/typescript/src/shared/functions.ts b/typescript/src/shared/functions.ts
+--- a/typescript/src/shared/functions.ts
++++ b/typescript/src/shared/functions.ts
+@@ -1008,7 +1008,7 @@ export const createOrder = async (
+   params: TypeOf<ReturnType<typeof createOrderParameters>>
+ ): Promise<any> => {
+   logger('[createOrder] Starting order creation process');
+-  const headers = await client.getHeaders();
++  const headers = await client.getHeaders({ requestId: params.request_id });
+   const url = `${client.getBaseUrl()}/v2/checkout/orders`;
+   const schema = createOrderParameters(context);
+   const parsedParams = schema.parse(params);
+@@ -1061,7 +1061,10 @@ export const captureOrder = async (
+     logger(`[captureOrder] Starting order capture process with params: ${JSON.stringify(params)}`);
+     const url = `${client.getBaseUrl()}/v2/checkout/orders/${params.id}/capture`;
+     const response = await axios.post(url, {}, {
+-      headers: await client.getHeaders()
++      // Default to the order id so a retried capture of the same order is
++      // safely deduped by PayPal's PayPal-Request-Id semantics. Explicit
++      // params.request_id wins when the caller wants finer control.
++      headers: await client.getHeaders({ requestId: params.request_id ?? params.id })
+     });
+     logger(`[captureOrder] Response %s`, response);
+     if (response.status <= 299) {
