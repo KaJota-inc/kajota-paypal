@@ -1,0 +1,16 @@
+Thanks @hilarl for naming the gap — and to @chopmob-cloud, @evidai, @Ectsang and @AmitabhainArunachala for mapping the surrounding corners (RIVR, AlgoVoi, LemonCake, the live `/mandate/verify` surface). Adding one more corner from a different angle.
+
+**Mesh is an atomic N-party fan-out primitive**, not a stablecoin and not a gateway. The split happens one layer downstream of your `MandateEnvelope`: once the Mandate has authorised the amount, Mesh distributes the proceeds across 2–16 payees in one atomic `release()`, binding the fan-out to the Payment Mandate at deposit time by `payment_mandate_id` + `payment_details_id` cross-ref.
+
+Where it fits in the thread's map:
+- RIVR / `transferWithMandate` enforces the Mandate at the token layer — Mesh is the layer *above* that, taking the Mandate's single `payment_details_total` and splitting it across the merchant, the agent that closed the sale, and any affiliate. The AP2 PaymentMandate names one `merchant_agent`; Mesh projects the Cart Mandate's `displayItems` + Channel3-style affiliate attribution into a `recipients[] + shares[]` tuple summing to 10 000 bps.
+- The constraints we enforce on-chain are different from yours (deactivate-only registry, sum-to-10 000-bps invariant, zero-dust rounding, destination-locked refund via `_originalBuyerOf`, zero-argument `release` so the trigger cannot change the share table) and sit alongside your Mandate verification, not in place of it.
+- Live on Arbitrum Sepolia today: `CosellRegistryV2` `0x5cda1ae0…`, `CosellEscrowV2(USDC)` `0xce77674e…`, `CosellEscrowV2(USDG)` `0xfc82984e…`. Repo: `KaJota-inc/kajota-arbitrum-singapore` HEAD `9f8fb5e`. 97 forge tests, PYUSD escrow pair deploying next against Paxos's `0x637A1259…`.
+- A reference Phase-A verifier for the AP2 CartMandate + PaymentMandate pair in TypeScript at `KaJota-inc/kajota-paypal/lib/ap2/` — currently the only TS binding I'm aware of, since the SDK is Python-primary. Happy to extract into a sibling PR if useful to anyone building TS integrations.
+
+Two concrete alignment points:
+
+1. **JCS.** The thread converges on `SHA-256(JCS(...))` lowercase hex and we're using recursive key-sort as a Phase A approximation — byte-equivalent for AP2's integer/decimal-string shape but not full RFC 8785. We'll swap to the `canonicalize` npm package before Phase B. Agreeing on one canonicalisation across settlement, gateway and token-level verifiers is a real win.
+2. **Attestation taxonomy.** @chopmob-cloud's July 12 split of the submission (settlement → Payments TWG, attestation → Agentic Authentication TWG) is exactly how our ERC-8004-based `AgentIdentityBinding` maps — authenticator provenance in one envelope, agent-decision claims as signed payload. Would appreciate a reality-check on whether that read is correct.
+
+Short honesty ledger: SD-JWT-VC signature verification is Phase B for us — the current verifier stops at structural + hash + cross-ref. No PYUSD deposit has fired yet; the Paxos faucet request is open. The 97 tests are forge-side only; the AP2 verifier side has a 5-gate adversarial-paths script but no test infrastructure yet. Open to redirecting toward the FIDO working groups once membership lands.
