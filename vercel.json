@@ -1,0 +1,41 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "functions": {
+    "app/api/paypal/webhook/route.ts": {
+      "runtime": "nodejs20.x",
+      "maxDuration": 30
+    },
+    "app/api/ap2/verify/route.ts": {
+      "runtime": "nodejs20.x",
+      "maxDuration": 15
+    },
+    "app/api/orchestrator/sessions/route.ts": {
+      "runtime": "nodejs20.x",
+      "maxDuration": 10
+    },
+    "app/api/orchestrator/sessions/seed/route.ts": {
+      "runtime": "nodejs20.x",
+      "maxDuration": 10
+    },
+    "app/api/mandate/receipt/[paymentMandateId]/route.ts": {
+      "runtime": "nodejs20.x",
+      "maxDuration": 10
+    }
+  },
+  "headers": [
+    {
+      "source": "/evidence",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=10, stale-while-revalidate=60" }
+      ]
+    },
+    {
+      "source": "/api/orchestrator/sessions",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=10, stale-while-revalidate=60" }
+      ]
+    }
+  ]
+}

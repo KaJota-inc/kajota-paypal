@@ -23,20 +23,20 @@ export default function Home() {
           </p>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-2">
+        <section className="grid gap-4 sm:grid-cols-3">
           <Link
             href="/chat"
             className="group flex flex-col gap-2 rounded-xl border border-black/[.08] bg-white p-6 transition-colors hover:border-black/[.2] dark:border-white/[.12] dark:bg-zinc-950 dark:hover:border-white/[.3]"
           >
             <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-              Buyer surface
+              Buyer
             </span>
             <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
               Agent chat &rarr;
             </h2>
             <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-              Shop in natural language. The agent calls Channel3, assembles an
-              AP2 Cart Mandate, and checks out on PayPal sandbox.
+              Shop in natural language. Channel3 for discovery, AP2 Cart
+              Mandate, PayPal sandbox checkout.
             </p>
           </Link>
           <Link
@@ -44,14 +44,30 @@ export default function Home() {
             className="group flex flex-col gap-2 rounded-xl border border-black/[.08] bg-white p-6 transition-colors hover:border-black/[.2] dark:border-white/[.12] dark:bg-zinc-950 dark:hover:border-white/[.3]"
           >
             <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-              Merchant surface
+              Merchant
             </span>
             <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
               Settlement dashboard &rarr;
             </h2>
             <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-              Every order, its Mandate hash, its Mesh listing, and the N-way
-              fan-out, with on-chain receipts.
+              Every order, Mandate hash, Mesh listing, N-way fan-out, on-chain
+              receipts.
+            </p>
+          </Link>
+          <Link
+            href="/evidence"
+            className="group flex flex-col gap-2 rounded-xl border border-emerald-500/40 bg-emerald-50 p-6 transition-colors hover:border-emerald-500/70 dark:border-emerald-500/30 dark:bg-emerald-500/10"
+          >
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+              Judges
+            </span>
+            <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+              Public evidence &rarr;
+            </h2>
+            <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+              No login. Live stats. Every tx linkable on Arbiscan. Refreshes
+              every 60 s.
             </p>
           </Link>
         </section>
