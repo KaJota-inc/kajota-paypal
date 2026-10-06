@@ -10,8 +10,12 @@ flowchart LR
     end
 
     subgraph MerchantSide["🏪 Merchant surface"]
-        Dashboard["<b>Settlement dashboard</b><br/>/dashboard<br/><i>Next.js + AG Grid</i>"]
-        Evidence["<b>Public evidence page</b><br/>/evidence<br/><i>no-login, 60s auto-refresh</i>"]
+        Dashboard["<b>Settlement dashboard</b><br/>/dashboard<br/><i>Next.js + AG Grid, seed button</i>"]
+        MandateInspector["<b>Mandate Inspector</b><br/>/mandate-inspector/[id]<br/><i>signed JSON + Beacon receipt</i>"]
+    end
+
+    subgraph JudgeSide["👁 Public judge surface"]
+        Evidence["<b>/evidence</b><br/><i>no-login · 60s auto-refresh ·<br/>stat cards + verify-yourself contracts</i>"]
     end
 
     subgraph PayPal["🅿 PayPal rail"]
@@ -27,9 +31,11 @@ flowchart LR
 
     subgraph Kajota["⚙ Kajota orchestration"]
         Webhook["<b>POST /api/paypal/webhook</b><br/><i>sig verify + Mandate parse</i>"]
-        AP2Verify["AP2 verifier<br/>schema + jose + hash + cross-ref"]
+        AP2Verify["AP2 verifier<br/>schema + jose + hash + cross-ref + cart_expiry"]
+        BeaconReceipt["<b>Mandate Beacon receipt</b><br/><i>canonical hash + Reg E / CBN SLA<br/>+ idempotency key</i>"]
         Projection["Cart → Mesh projection<br/>recipients[] + shares[] = 10000 bps"]
         Sessions["Session store<br/>in-memory → Vercel KV"]
+        ChatRoute["POST /api/chat<br/><i>SSE agent trace (scripted)</i>"]
     end
 
     subgraph OnChain["⛓ Arbitrum Sepolia (chainId 421614)"]
@@ -46,6 +52,8 @@ flowchart LR
     end
 
     Buyer -->|1 prompt| AgentChat
+    AgentChat -->|SSE events| ChatRoute
+    ChatRoute -->|stream back to UI| AgentChat
     AgentChat -->|2 discover| Channel3
     Channel3 -->|offers + affiliate attribution| AgentChat
     AgentChat -->|3 assemble| CartMandate
@@ -56,7 +64,8 @@ flowchart LR
     PaymentMandate --> Webhook
     CartMandate --> Webhook
     Webhook --> AP2Verify
-    AP2Verify --> Projection
+    AP2Verify --> BeaconReceipt
+    BeaconReceipt --> Projection
     Projection --> Sessions
     Projection -->|8a| Registry
     Registry -->|listingId| Escrow
@@ -67,7 +76,9 @@ flowchart LR
     Escrow -->|release · atomic| Agent
     Escrow -->|release · atomic| Affiliate
     Sessions --> Dashboard
+    Sessions --> MandateInspector
     Sessions --> Evidence
+    BeaconReceipt --> MandateInspector
     Escrow -->|Released event| Evidence
 
     classDef live fill:#10b981,color:#fff,stroke:#047857
