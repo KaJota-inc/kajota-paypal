@@ -1,0 +1,101 @@
+# The accumulating runner — playbook move #1 incarnated.
+#
+# Fires every six hours against the deployed PayPal webhook with a
+# fresh stub-signed AP2 Mandate pair. Each firing is one real end-to-end
+# execution: Cart Mandate signed → Payment Mandate built → POST to
+# /api/paypal/webhook → verifier → projection → register → deposit →
+# release. The commit SHA that scheduled the run goes in the job
+# summary so a judge reading /evidence can trace each execution back
+# to this file.
+#
+# Lesson from the Keeperhub teardown ([[feedback_winner_teardown_keeperhub]]):
+# bursar won 3rd place with 469 executions on a 6-hourly GitHub Action.
+# Our Keeperhub loss had one `approve(x, 0)` tx. The difference is this
+# file.
+#
+# Required repo secrets (set via `gh secret set` or the GitHub UI):
+#   MESH_WEBHOOK_URL     Full URL to POST, e.g.
+#                        https://kajota-paypal.vercel.app/api/paypal/webhook
+#   MESH_RUNNER_TOKEN    Shared secret the webhook validates (optional
+#                        during Phase A — webhook ignores it until the
+#                        auth gate is wired in Phase B)
+
+name: mesh-runner
+
+on:
+  schedule:
+    # Every 6 hours on the hour, matching the Keeperhub bursar cadence
+    # the playbook memory names.
+    - cron: "7 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      note:
+        description: "Optional note to attach to this manual run"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mesh-runner
+  cancel-in-progress: false
+
+jobs:
+  fire:
+    name: Fire one end-to-end Mesh execution
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      MESH_WEBHOOK_URL: ${{ secrets.MESH_WEBHOOK_URL }}
+      MESH_RUNNER_TOKEN: ${{ secrets.MESH_RUNNER_TOKEN }}
+      MESH_RUNNER_NOTE: ${{ inputs.note || format('scheduled run from {0}', github.sha) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.9.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Guard — webhook URL set
+        run: |
+          if [ -z "$MESH_WEBHOOK_URL" ]; then
+            echo "::warning::MESH_WEBHOOK_URL is not set — the runner needs a deployed webhook to accumulate executions."
+            echo "::warning::Set it with: gh secret set MESH_WEBHOOK_URL --body 'https://kajota-paypal.vercel.app/api/paypal/webhook'"
+            exit 0
+          fi
+
+      - name: Fire one stub-signed Mandate pair at the webhook
+        id: fire
+        run: pnpm tsx scripts/runner/fire-stub-webhook.ts
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Mesh runner — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo ""
+            echo "- Commit:   \`${{ github.sha }}\`"
+            echo "- Note:     \`${MESH_RUNNER_NOTE}\`"
+            echo "- Webhook:  \`${MESH_WEBHOOK_URL}\`"
+            echo "- Status:   ${{ job.status }}"
+            echo ""
+            if [ -f runner-response.json ]; then
+              echo "### Response"
+              echo ""
+              echo '```json'
+              cat runner-response.json
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
