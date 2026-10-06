@@ -1,0 +1,76 @@
+%% Kajota Mesh for PayPal × AI — the eight-stage pipeline
+%%
+%% Rendered via mermaid-cli or any mermaid-aware viewer. Submission artefact
+%% per the Devpost rubric's architecture-diagram line.
+
+flowchart LR
+    subgraph BuyerSide["🛒 Buyer surface"]
+        Buyer([Buyer])
+        AgentChat["<b>Agent chat</b><br/>/chat<br/><i>Vercel AI SDK + OpenAI</i>"]
+    end
+
+    subgraph MerchantSide["🏪 Merchant surface"]
+        Dashboard["<b>Settlement dashboard</b><br/>/dashboard<br/><i>Next.js + AG Grid</i>"]
+        Evidence["<b>Public evidence page</b><br/>/evidence<br/><i>no-login, 60s auto-refresh</i>"]
+    end
+
+    subgraph PayPal["🅿 PayPal rail"]
+        Channel3[("Channel3<br/>/v1/search<br/>product discovery")]
+        PayPalCart["PayPal Cart API<br/>POST /merchant-cart"]
+        PayPalCheckout["PayPal Checkout<br/>POST /checkout"]
+    end
+
+    subgraph AP2["📜 AP2 — Agent Payments Protocol v0.2"]
+        CartMandate[/"Cart Mandate<br/>JWT, cart_hash claim"/]
+        PaymentMandate[/"Payment Mandate<br/>SD-JWT-VC, transaction_data"/]
+    end
+
+    subgraph Kajota["⚙ Kajota orchestration"]
+        Webhook["<b>POST /api/paypal/webhook</b><br/><i>sig verify + Mandate parse</i>"]
+        AP2Verify["AP2 verifier<br/>schema + jose + hash + cross-ref"]
+        Projection["Cart → Mesh projection<br/>recipients[] + shares[] = 10000 bps"]
+        Sessions["Session store<br/>in-memory → Vercel KV"]
+    end
+
+    subgraph OnChain["⛓ Arbitrum Sepolia (chainId 421614)"]
+        Registry["<b>CosellRegistryV2</b><br/>0x5cda1ae0…<br/>register(productId, recipients, shares, currency)"]
+        Escrow["<b>CosellEscrowV2(PYUSD)</b><br/><i>deploy pending</i><br/>deposit · release · refund"]
+        Facilitator["X402DepositFacilitator(PYUSD)<br/><i>deploy pending</i><br/>gasless EIP-3009 pay-in"]
+        Identity["AgentIdentityBinding<br/>0x716d9c12…<br/>ERC-8004 metadata hop"]
+    end
+
+    subgraph Payouts["💵 Payees"]
+        Merchant["Merchant wallet<br/>70% residual"]
+        Agent["Agent wallet<br/>20% default"]
+        Affiliate["Affiliate wallet<br/>10% default"]
+    end
+
+    Buyer -->|1 prompt| AgentChat
+    AgentChat -->|2 discover| Channel3
+    Channel3 -->|offers + affiliate attribution| AgentChat
+    AgentChat -->|3 assemble| CartMandate
+    AgentChat -->|4 trigger| PayPalCart
+    Buyer -->|5 approve| PayPalCheckout
+    PayPalCheckout -->|6 emit| PaymentMandate
+    PayPalCheckout -->|7 webhook| Webhook
+    PaymentMandate --> Webhook
+    CartMandate --> Webhook
+    Webhook --> AP2Verify
+    AP2Verify --> Projection
+    Projection --> Sessions
+    Projection -->|8a| Registry
+    Registry -->|listingId| Escrow
+    Facilitator -.->|gasless path| Escrow
+    Projection -->|8b| Escrow
+    Identity -.->|agent id attestation| Projection
+    Escrow -->|release · atomic| Merchant
+    Escrow -->|release · atomic| Agent
+    Escrow -->|release · atomic| Affiliate
+    Sessions --> Dashboard
+    Sessions --> Evidence
+    Escrow -->|Released event| Evidence
+
+    classDef live fill:#10b981,color:#fff,stroke:#047857
+    classDef pending fill:#f59e0b,color:#fff,stroke:#b45309
+    class Registry,Identity live
+    class Escrow,Facilitator pending
