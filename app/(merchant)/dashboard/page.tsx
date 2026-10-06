@@ -182,6 +182,12 @@ export default function MerchantDashboardPage() {
         cellRenderer: hashLink("tx"),
       },
       {
+        headerName: "Inspector",
+        width: 100,
+        valueGetter: (p) => p.data?.paymentMandateId,
+        cellRenderer: InspectorLinkCell,
+      },
+      {
         field: "errorReason",
         headerName: "Error",
         flex: 1,
@@ -266,6 +272,22 @@ export default function MerchantDashboardPage() {
     </div>
   );
 }
+
+function InspectorLinkCell(p: ICellRendererParams<Session, string>) {
+  const id = p.value;
+  if (!id) return null;
+  return (
+    <a
+      href={`/mandate-inspector/${encodeURIComponent(id)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 rounded border border-emerald-500/30 bg-emerald-500/5 px-2 py-0.5 text-xs font-medium text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-300"
+    >
+      open ↗
+    </a>
+  );
+}
+InspectorLinkCell.displayName = "InspectorLinkCell";
 
 function hashLink(kind: "tx" | "address") {
   const prefix = kind === "tx" ? "tx" : "address";
