@@ -1,0 +1,60 @@
+diff --git a/code/sdk/python/ap2/sdk/receipt_wrapper.py b/code/sdk/python/ap2/sdk/receipt_wrapper.py
+--- a/code/sdk/python/ap2/sdk/receipt_wrapper.py
++++ b/code/sdk/python/ap2/sdk/receipt_wrapper.py
+@@ -116,7 +116,10 @@ class ReceiptClient:
+           receipt_jwt: The receipt JWT string to verify.
+           receipt_issuer_public_key: The public key to verify the JWT signature.
+           has_reference_in_store_cb: Optional callback to check if the receipt
+-            reference exists in the store.
++            reference exists in the store. When omitted, the store check is
++            skipped and the returned result dict carries
++            `reference_check_skipped: True` so callers can detect the
++            degraded verification.
+           is_payment_receipt: Whether this is a payment or checkout receipt.
+
+         Returns:
+@@ -143,14 +146,24 @@ class ReceiptClient:
+
+         # 2. Verify receipt reference exists in the issuer's store
+         receipt_reference = getattr(receipt.root, 'reference', None)
+-        if not has_reference_in_store_cb(receipt_reference):
+-            _logger.warning(
+-                'Receipt reference not found in store: %s',
+-                receipt_reference,
+-            )
+-            return {
+-                'error': 'receipt_reference_not_found_in_store',
+-                'message': (
+-                    'Receipt reference does not match any known closed '
+-                    'mandate for'
+-                ),
+-            }
++        reference_check_skipped = False
++        if has_reference_in_store_cb is None:
++            _logger.warning(
++                'has_reference_in_store_cb was not supplied; skipping store '
++                'check for receipt reference %s. The returned result flags '
++                '`reference_check_skipped: True` so callers can detect the '
++                'degraded verification.',
++                receipt_reference,
++            )
++            reference_check_skipped = True
++        elif not has_reference_in_store_cb(receipt_reference):
++            _logger.warning(
++                'Receipt reference not found in store: %s',
++                receipt_reference,
++            )
++            return {
++                'error': 'receipt_reference_not_found_in_store',
++                'message': (
++                    'Receipt reference does not match any known closed '
++                    'mandate for'
++                ),
++            }
++
++        # 3. Return the verified result + the skipped-check flag so the caller
++        # can detect the degraded path without parsing logs.
++        return {
++            'verified': True,
++            'reference_check_skipped': reference_check_skipped,
++        }
