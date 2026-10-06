@@ -1,0 +1,82 @@
+#
+# CI quality gate — runs the same six gates `pnpm preflight` runs locally,
+# in a clean Linux + Node 20 + pnpm 9.9 environment. Pairs with the
+# mesh-runner workflow: this one proves the SUBMISSION reproduces; that one
+# proves the PIPELINE accumulates.
+#
+# Any PR or push to main that fails any gate blocks the merge button.
+# No secrets required — every gate runs purely in-repo (no PayPal, no chain,
+# no OpenAI key).
+#
+
+name: ci
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: preflight — typecheck · lint · build · reproduce · reproduce:fail
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.9.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+      - name: Happy-path reproducer
+        run: pnpm reproduce
+
+      - name: 7-gate adversarial table
+        run: pnpm reproduce:fail
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## CI gate · $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo ""
+            echo "- Commit:   \`${{ github.sha }}\`"
+            echo "- Branch:   \`${{ github.ref_name }}\`"
+            echo "- Status:   ${{ job.status }}"
+            echo ""
+            echo "The six gates below are the submission's reproducibility floor:"
+            echo "- \`pnpm typecheck\` — TypeScript 5.9 strict"
+            echo "- \`pnpm lint\` — ESLint 9 + next 16.3.8 strictness"
+            echo "- \`pnpm build\` — Next.js 16 production build"
+            echo "- \`pnpm reproduce\` — happy-path AP2 Mandate → Mesh projection"
+            echo "- \`pnpm reproduce:fail\` — 7-gate adversarial table"
+            echo "- Local: \`pnpm preflight\` runs all five above in 16 s"
+          } >> "$GITHUB_STEP_SUMMARY"
