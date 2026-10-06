@@ -1,0 +1,17 @@
+diff --git a/code/sdk/python/ap2/sdk/sdjwt/common.py b/code/sdk/python/ap2/sdk/sdjwt/common.py
+--- a/code/sdk/python/ap2/sdk/sdjwt/common.py
++++ b/code/sdk/python/ap2/sdk/sdjwt/common.py
+@@ -82,7 +82,10 @@ class ParsedToken:
+         cnf = self._find_cnf()
+         if isinstance(cnf, dict) and 'jwk' in cnf:
+             jwk_model = JsonWebKey.model_validate(cnf['jwk'])
+-            return JWK(**jwk_model.model_dump(exclude_none=True))
++            # mode="json" serialises Pydantic enum fields (KeyUse, KeyType,
++            # KeyOperation, …) to their string .value representations, which
++            # is what jwcrypto's JWK constructor accepts. Without this,
++            # delegation hops whose `cnf.jwk` carries e.g. `"use": "sig"`
++            # pass Pydantic validation but silently fail jwcrypto key build.
++            return JWK(**jwk_model.model_dump(exclude_none=True, mode="json"))
+         return None
+
+     def _find_cnf(self) -> dict[str, Any] | None:

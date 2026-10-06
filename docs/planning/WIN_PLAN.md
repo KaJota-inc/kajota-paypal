@@ -97,6 +97,12 @@ Ranked by playbook-leverage × unblocked-today:
 ### Submit (11–12 Nov)
 - Submit at 09:00 PST 12 Nov leaving a 3-hour recovery buffer.
 
+### Decision gate — 28 Oct — Mandate Beacon retrofit
+
+Per [`mandate-beacon-reuse-brief.md`](mandate-beacon-reuse-brief.md): three days after BLI Legal Tech 2 submits (Nov 1), decide whether to retrofit the Mandate Beacon from [[project_bli_legal_tech_2]] as the compliance-receipt layer *under* every AP2 Payment Mandate here. Two-day plug: one `MandateAnchor.recordMandate(canonicalHash)` call between Mandate decode and on-chain write; one `/mandate-inspector/[mandateId]` deep-link; one extra row in HARD_PARTS. The pitch headline **stays "the 43rd tool"**; Beacon is a compliance *exhibit* on the AP2 primitive, not a co-headline. Three go/no-go questions in the brief; any `no` drops the plug cleanly.
+
+Addressable prize bump if we fire: $27K of the $67.5K pool. Floor win scenario still clears the opportunity cost. **Hook preparation ahead of 28 Oct:** our existing `cartMandateHash()` and `paymentMandateContentsHash()` in `lib/ap2/hash.ts` are already the canonical-hash primitives the plug needs — no scaffolding deferred.
+
 ---
 
 ## 6. Risk register
