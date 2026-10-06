@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test test/**/*.test.ts",
     "reproduce": "tsx scripts/reproduce-paypal-mesh-flow.ts",
     "reproduce:fail": "tsx scripts/fail/_runner.ts",
     "preflight": "bash scripts/preflight.sh"

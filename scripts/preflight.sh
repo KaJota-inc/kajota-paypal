@@ -63,6 +63,14 @@ else
   report_fail "build failed" "$LOGDIR/build.log"
 fi
 
+banner "unit tests · pnpm test"
+if pnpm test > "$LOGDIR/test.log" 2>&1; then
+  passed=$(grep -E "pass [0-9]+" "$LOGDIR/test.log" | awk '{print $NF}')
+  green "  ✓ ${passed:-?} tests pass"
+else
+  report_fail "unit tests failed" "$LOGDIR/test.log"
+fi
+
 banner "happy path · pnpm reproduce"
 if pnpm reproduce > "$LOGDIR/reproduce.log" 2>&1; then
   green "  ✓ pipeline settles end-to-end (no env, no chain, no server)"

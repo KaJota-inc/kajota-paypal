@@ -56,6 +56,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Unit tests
+        run: pnpm test
+
       - name: Happy-path reproducer
         run: pnpm reproduce
 
@@ -72,11 +75,12 @@ jobs:
             echo "- Branch:   \`${{ github.ref_name }}\`"
             echo "- Status:   ${{ job.status }}"
             echo ""
-            echo "The six gates below are the submission's reproducibility floor:"
+            echo "The seven gates below are the submission's reproducibility floor:"
             echo "- \`pnpm typecheck\` — TypeScript 5.9 strict"
             echo "- \`pnpm lint\` — ESLint 9 + next 16.3.8 strictness"
             echo "- \`pnpm build\` — Next.js 16 production build"
+            echo "- \`pnpm test\` — node:test unit suite on lib/ap2"
             echo "- \`pnpm reproduce\` — happy-path AP2 Mandate → Mesh projection"
             echo "- \`pnpm reproduce:fail\` — 7-gate adversarial table"
-            echo "- Local: \`pnpm preflight\` runs all five above in 16 s"
+            echo "- Local: \`pnpm preflight\` runs all of the above in ~20 s"
           } >> "$GITHUB_STEP_SUMMARY"
