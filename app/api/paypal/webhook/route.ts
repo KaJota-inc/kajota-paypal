@@ -17,6 +17,8 @@ import {
   type SessionRecipient,
 } from "@/lib/orchestrator/sessions";
 import { cartMandateHash, paymentMandateContentsHash } from "@/lib/ap2/hash";
+import { buildBeaconReceipt } from "@/lib/beacon";
+import { beaconReplayStore } from "@/lib/beacon/replay-store";
 
 export const runtime = "nodejs";
 
@@ -138,6 +140,20 @@ export async function POST(req: Request) {
     },
   );
 
+  // Mandate Beacon — compliance-replay receipt computed off the Mandate
+  // pair before any chain write. The commitment is byte-identical to the
+  // on-chain `MandateAnchor.mandateCommitment()` so a regulator replaying
+  // this submission later gets the same leaf hash. See docs/MANDATE_BEACON.md
+  // and HARD_PARTS §19–§21.
+  const beaconReceipt = buildBeaconReceipt(
+    {
+      cartMandate: cartParse.data,
+      paymentMandate: paymentParse.data,
+      merchantAddress: body.merchant_address as `0x${string}`,
+    },
+    { seenIdempotencyKeys: beaconReplayStore },
+  );
+
   const now = new Date().toISOString();
   const initial: Session = {
     paymentMandateId: idempotencyKey,
@@ -151,6 +167,7 @@ export async function POST(req: Request) {
     merchantName: cartParse.data.contents.merchant_name,
     recipients,
     status: "pending-register",
+    beaconReceipt,
     createdAt: now,
     updatedAt: now,
   };

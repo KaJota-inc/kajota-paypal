@@ -1,5 +1,6 @@
 import type { Hex } from "viem";
 import type { MeshListingTuple } from "@/lib/ap2/mesh-projection";
+import type { BeaconReceipt } from "@/lib/beacon";
 
 /**
  * A `Session` is one PayPal order's lifecycle through the Mesh pipeline, as
@@ -40,6 +41,13 @@ export type Session = {
   createdAt: string;
   updatedAt: string;
   errorReason?: string;
+  /**
+   * Compliance-replay receipt from the Mandate Beacon layer. Computed off
+   * the AP2 Mandate pair at ingest; byte-identical to the on-chain
+   * commitment MandateAnchor would emit. Absent until Beacon is wired
+   * in a given flow; the inspector route reads it off the Session.
+   */
+  beaconReceipt?: BeaconReceipt;
 };
 
 export interface SessionStore {
