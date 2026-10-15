@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import {
   AllCommunityModule,
@@ -31,11 +31,26 @@ const STATUS_STYLE: Record<SettlementStatus, string> = {
     "bg-rose-500/10 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300",
 };
 
+type Toast = {
+  id: string;
+  sessionId: string;
+  merchant: string;
+  recipients: SessionRecipient[];
+  currency: string;
+};
+
+const TOAST_LIFETIME_MS = 12_000;
+
 export default function MerchantDashboardPage() {
   const [rows, setRows] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<"seed" | "clear" | null>(null);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const priorStatusRef = useRef<Map<string, SettlementStatus>>(new Map());
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -45,18 +60,50 @@ export default function MerchantDashboardPage() {
       });
       const data = (await res.json()) as { sessions?: Session[]; error?: string };
       if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
-      setRows(data.sessions ?? []);
+      const incoming = data.sessions ?? [];
+      // Fire a toast on each transition (anything → released) since the last pull.
+      // The Hustle Engine: "pay out fast, every time, visibly" — make earning
+      // an event. The dashboard says it out loud instead of changing a chip
+      // silently.
+      const prior = priorStatusRef.current;
+      const newToasts: Toast[] = [];
+      for (const s of incoming) {
+        const was = prior.get(s.paymentMandateId);
+        if (s.status === "released" && was && was !== "released") {
+          newToasts.push({
+            id: `${s.paymentMandateId}_${Date.now()}`,
+            sessionId: s.paymentMandateId,
+            merchant: s.merchantName,
+            recipients: s.recipients,
+            currency: s.currency,
+          });
+        }
+      }
+      // Rebuild the map from the fresh snapshot (handles cleared/deleted rows).
+      const nextMap = new Map<string, SettlementStatus>();
+      for (const s of incoming) nextMap.set(s.paymentMandateId, s.status);
+      priorStatusRef.current = nextMap;
+
+      setRows(incoming);
       setError(null);
+      if (newToasts.length > 0) {
+        setToasts((prev) => [...prev, ...newToasts]);
+        for (const t of newToasts) {
+          window.setTimeout(() => dismissToast(t.id), TOAST_LIFETIME_MS);
+        }
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [dismissToast]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
+    const interval = window.setInterval(refresh, 8_000);
+    return () => window.clearInterval(interval);
   }, [refresh]);
 
   const seed = useCallback(async () => {
@@ -246,6 +293,8 @@ export default function MerchantDashboardPage() {
         </div>
       ) : null}
 
+      <ToastHost toasts={toasts} onDismiss={dismissToast} />
+
       <section className="h-[640px] w-full overflow-hidden rounded-xl border border-black/[.08] bg-white shadow-sm dark:border-white/[.1] dark:bg-zinc-950">
         {rows.length === 0 && !loading ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm text-zinc-500">
@@ -269,6 +318,64 @@ export default function MerchantDashboardPage() {
           />
         )}
       </section>
+    </div>
+  );
+}
+
+function ToastHost({
+  toasts,
+  onDismiss,
+}: {
+  toasts: Toast[];
+  onDismiss: (id: string) => void;
+}) {
+  if (toasts.length === 0) return null;
+  return (
+    <div className="pointer-events-none fixed right-4 top-4 z-50 flex max-w-sm flex-col gap-2 sm:right-6 sm:top-6">
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          className="pointer-events-auto flex flex-col gap-2 rounded-xl border border-emerald-500/40 bg-white p-4 shadow-xl shadow-emerald-500/10 ring-1 ring-emerald-500/20 dark:bg-zinc-950"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                Released on Mesh
+              </span>
+            </div>
+            <button
+              onClick={() => onDismiss(t.id)}
+              className="text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+              aria-label="dismiss"
+            >
+              ✕
+            </button>
+          </div>
+          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            You just paid {t.merchant}:
+          </p>
+          <div className="flex flex-col gap-1">
+            {t.recipients.map((r) => (
+              <div
+                key={r.address + r.role}
+                className="flex items-center justify-between text-xs"
+              >
+                <span className="text-zinc-500">{r.role}</span>
+                <span className="font-mono text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                  {formatMinor(r.payoutMinorUnits, t.currency)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] leading-snug text-zinc-500">
+            One PayPal order → N payees atomically. No T+30, no spreadsheet.
+          </p>
+        </div>
+      ))}
     </div>
   );
 }

@@ -183,6 +183,17 @@ function EventRow({ ev }: { ev: Row }) {
         </Row>
       );
     case "tool_result":
+      if (ev.tool === "channel3.search" && Array.isArray(ev.result)) {
+        return (
+          <Row dot="bg-sky-400" label={`result · ${ev.tool}`}>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {(ev.result as Channel3Offer[]).map((offer) => (
+                <OfferCard key={offer.productId} offer={offer} />
+              ))}
+            </div>
+          </Row>
+        );
+      }
       return (
         <Row dot="bg-sky-400" label={`result · ${ev.tool}`}>
           <details className="text-xs">
@@ -240,6 +251,45 @@ function EventRow({ ev }: { ev: Row }) {
         </Row>
       );
   }
+}
+
+type Channel3Offer = {
+  productId: string;
+  title: string;
+  priceCents: number;
+  merchantDomain: string;
+  affiliate?: { commissionBps?: number };
+};
+
+function OfferCard({ offer }: { offer: Channel3Offer }) {
+  const bps = offer.affiliate?.commissionBps ?? 0;
+  const reshareCents = Math.round((offer.priceCents * bps) / 10_000);
+  return (
+    <div className="flex flex-col gap-1.5 rounded-lg border border-black/[.08] bg-zinc-50 p-3 dark:border-white/[.1] dark:bg-zinc-900/70">
+      <span className="text-[11px] uppercase tracking-wide text-zinc-500">
+        {offer.merchantDomain}
+      </span>
+      <span className="font-medium text-zinc-900 dark:text-zinc-50">
+        {offer.title}
+      </span>
+      <span className="font-mono text-sm text-zinc-700 dark:text-zinc-300">
+        {formatCents(offer.priceCents)}
+      </span>
+      {bps > 0 ? (
+        <div className="mt-1 inline-flex w-fit items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-medium text-amber-800 ring-1 ring-inset ring-amber-500/30 dark:bg-amber-400/15 dark:text-amber-200">
+          <span>↻ Reshare → agent earns</span>
+          <span className="font-mono">{formatCents(reshareCents)}</span>
+          <span className="opacity-70">({(bps / 100).toFixed(1)}%)</span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function formatCents(cents: number): string {
+  const whole = Math.floor(cents / 100);
+  const frac = (cents % 100).toString().padStart(2, "0");
+  return `$${whole}.${frac}`;
 }
 
 function Row({

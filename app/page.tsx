@@ -23,7 +23,7 @@ export default function Home() {
           </p>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-3">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Link
             href="/chat"
             className="group flex flex-col gap-2 rounded-xl border border-black/[.08] bg-white p-6 transition-colors hover:border-black/[.2] dark:border-white/[.12] dark:bg-zinc-950 dark:hover:border-white/[.3]"
@@ -35,8 +35,8 @@ export default function Home() {
               Agent chat &rarr;
             </h2>
             <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-              Shop in natural language. Channel3 for discovery, AP2 Cart
-              Mandate, PayPal sandbox checkout.
+              Shop in natural language. Channel3, AP2 Cart Mandate, PayPal
+              checkout.
             </p>
           </Link>
           <Link
@@ -50,8 +50,23 @@ export default function Home() {
               Settlement dashboard &rarr;
             </h2>
             <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-              Every order, Mandate hash, Mesh listing, N-way fan-out, on-chain
-              receipts.
+              Every order, Mandate, listing, N-way fan-out, Arbiscan receipts.
+            </p>
+          </Link>
+          <Link
+            href="/leaderboard"
+            className="group flex flex-col gap-2 rounded-xl border border-amber-500/40 bg-amber-50 p-6 transition-colors hover:border-amber-500/70 dark:border-amber-500/30 dark:bg-amber-500/10"
+          >
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-amber-700 dark:text-amber-300">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+              Agent sell-side
+            </span>
+            <h2 className="text-lg font-semibold text-black dark:text-zinc-50">
+              Who&apos;s hustling &rarr;
+            </h2>
+            <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+              Rank the hustlers. PYUSD earned, role mix, streaks. Standing is
+              a reward.
             </p>
           </Link>
           <Link
@@ -66,8 +81,7 @@ export default function Home() {
               Public evidence &rarr;
             </h2>
             <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-              No login. Live stats. Every tx linkable on Arbiscan. Refreshes
-              every 60 s.
+              No login. Live stats. Every tx on Arbiscan. 60 s refresh.
             </p>
           </Link>
         </section>

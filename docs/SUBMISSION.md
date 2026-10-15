@@ -6,33 +6,33 @@
 
 ## Elevator pitch (≤280 chars for the Devpost field)
 
-The 43rd tool for the PayPal Agent Toolkit: fan out a PayPal order's proceeds to the merchant, the agent that closed the sale, and the affiliate — one transaction, N payees, AP2-bound, PYUSD-settled on Arbitrum.
+Kajota Mesh is the atomic payout rail for the agent sell-side. One PayPal order, N payees, same block as the merchant. AP2-bound, PYUSD-settled on Arbitrum — the 43rd tool for the PayPal Agent Toolkit, and the one that pays agents what they just earned.
 
 ## Inspiration
 
-I spent a decade inside Nigerian payment infrastructure — Remita, Ecobank, Breet — building reconciliation for merchants whose settlement always landed days after the sale. The one wall every system I built hit was the same: when more than one party contributed to a sale, cutting them in took T+30 at best, a quarterly spreadsheet at worst. Agentic commerce is about to make that wall unbearable. An AI agent that discovers a product, closes the sale, and then waits for a human to reconcile its commission is not autonomous — it is a lead-gen tool with worse UX. Kajota Mesh is the primitive that lets the agent get paid at the same block the merchant does.
+Marketplaces are moated by their sell side — makers, resellers, agents who close sales. The buy side is a search bar. The sell side comes back only if payout arrives fast and visibly.
+
+I spent a decade in Nigerian payment infra — Remita, Ecobank, Breet — reconciling settlement that landed days after the sale, and when more than one party contributed, taking T+30 or a quarterly spreadsheet to cut everyone in. Agentic commerce makes that wall unbearable: an AI agent that closes a sale and waits for a human to reconcile its commission is a lead-gen tool with worse UX. Mesh pays the agent in the same block as the merchant.
 
 ## What it does
 
-PayPal's Agent Toolkit gives agents 42 tools — invoicing, orders, subscriptions, disputes. **Not one pays an agent.** The Cart API v1 accepts no `splits` field. The AP2 Payment Mandate names one `merchant_agent`. When the agent earns a commission for closing the sale, it is reimbursed days later, through an out-of-band invoice.
-
-Mesh fills the gap. A PayPal Cart API checkout triggers our webhook with the AP2 Mandate pair. The verifier cross-refs `payment_details_id`, projects the Cart's `displayItems` plus any Channel3 affiliate attribution into a 2–16-recipient tuple summing to exactly 10 000 bps, registers the listing on `CosellRegistryV2` (Arbitrum Sepolia), deposits the PYUSD equivalent, and releases atomically to every payee in one block. The release trigger cannot change the share table — fixed at listing time.
+PayPal's Agent Toolkit gives agents 42 tools. **Not one pays an agent.** The Cart API has no `splits` field; the AP2 Payment Mandate names one `merchant_agent`. Mesh fills the gap. A PayPal checkout fires our webhook with the AP2 Mandate pair; the verifier cross-refs `payment_details_id`, projects the Cart plus Channel3 affiliate attribution into a 2–16-recipient tuple summing to 10 000 bps, registers on `CosellRegistryV2` (Arbitrum Sepolia), deposits PYUSD and releases atomically in one transaction. The `/leaderboard` ranks every agent and affiliate by PYUSD earned, with streaks — standing is a reward you don't have to pay out in cash.
 
 ## How we built it
 
-Next.js 16 + TypeScript strict + AG Grid dashboard + viem for chain reads/writes + jose for Mandate verification + Vercel AI SDK + OpenAI for the buyer-chat harness + the PayPal Agent Toolkit for merchant-side tool calls. On-chain: ten verified contracts carried forward from the Arbitrum Open House Singapore submission (`KaJota-inc/kajota-arbitrum-singapore@9f8fb5e`), 97 forge tests. The PYUSD escrow pair is a redeploy against Paxos's canonical Arbitrum Sepolia PYUSD `0x637A1259…B1`.
+Next.js 16 strict + AG Grid + viem + jose + Vercel AI SDK + PayPal Agent Toolkit. On-chain: ten verified contracts carried forward from Arbitrum Singapore (`KaJota-inc/kajota-arbitrum-singapore@9f8fb5e`), 97 forge tests. PYUSD escrow is a redeploy against Paxos's canonical Sepolia address.
 
 ## Challenges
 
-Documented as runnable `scripts/fail/*.ts` not prose: sum-not-10 000-bps, duplicate-recipient, expired-cart-mandate, swapped-mandate-pair, tampered-cart-contents. `pnpm reproduce:fail` fires every gate and prints a hash per branch. The full constraints appendix with symptom-cause-fix rows is in `docs/HARD_PARTS.md`.
+Runnable, not prose: `scripts/fail/*.ts` fires sum-not-10 000-bps, duplicate-recipient, expired-cart-mandate, swapped-mandate-pair, tampered-cart-contents. `pnpm reproduce:fail` prints a hash per branch.
 
 ## Accomplishments
 
-Two upstream contributions filed: a fix for `paypal/agent-toolkit#98` (per-call PayPal-Request-Id, closes an idempotency gap in `create_order` + `capture_order`) and a technical comment on `google-agentic-commerce/AP2#255`'s on-chain-settlement thread. A GitHub Actions runner that fires one real end-to-end execution every six hours into our deployed webhook; see `/evidence` for the accumulating ledger.
+Two upstream PRs: `paypal/agent-toolkit#98` (per-call PayPal-Request-Id) and a technical comment on `google-agentic-commerce/AP2#255`'s on-chain-settlement thread. A GitHub Actions runner fires one end-to-end execution every six hours; `/evidence` is the live ledger.
 
 ## What we got wrong first
 
-[`WHAT_WE_GOT_WRONG_FIRST.md`](WHAT_WE_GOT_WRONG_FIRST.md) — six real entries, honestly disclosed. Chief among them: our first guess at the AP2 Payment Mandate schema was wrong on three load-bearing fields; the real Pydantic model named exactly one `merchant_agent`, which is precisely the gap Mesh fills.
+[`WHAT_WE_GOT_WRONG_FIRST.md`](WHAT_WE_GOT_WRONG_FIRST.md) — six honest entries. Chief: our first AP2 Payment Mandate schema was wrong on three load-bearing fields; the real Pydantic names exactly one `merchant_agent` — the gap Mesh fills.
 
 ## Built with
 
