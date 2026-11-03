@@ -1,8 +1,10 @@
 # Upstream PR status tracker
 
-_Last updated 06 Oct 2026 — Day 3 of 42. Playbook move #3 halfway deadline: 26 Oct (20 days)._
+_Last updated 03 Nov 2026 — Day 30 of 42. Playbook move #3 halfway redefined: Nov 7 (4 days). Submission deadline Nov 12 20:00 UTC._
 
 One table, one truth. Each row is a drafted upstream artefact, its current state, and the exact command the user runs to move it one step. Updated at every commit that touches `docs/upstream-prs/`.
+
+**Current reality (2026-11-03):** All 5 drafts remain DRAFTED. Zero opened. Target repos verified open via `gh api`. See [`../UPSTREAM_PR.md`](../UPSTREAM_PR.md) for the owner action plan.
 
 ## State machine
 
@@ -86,12 +88,12 @@ gh issue comment 255 --repo google-agentic-commerce/AP2 \
   --body-file ~/Documents/kajota-paypal/docs/upstream-prs/ap2-255-comment/COMMENT.md
 ```
 
-## Opening order (recommended)
+## Opening order (recommended) — REVISED 2026-11-03
 
-1. **This week (06–12 Oct):** #255 comment + #98 PR + #372 PR + #367 PR. Three PRs ride together through the first review cycle.
-2. **Next week (13–19 Oct):** #43 after #98 merges, to avoid the merge-conflict on the same file.
-3. **Monday 20 Oct:** Scout the backlogs again per [`BACKLOG_SCOUT.md`](BACKLOG_SCOUT.md) §Follow-up cadence. Any new unassigned bug files worth drafting become candidates for the 20–26 Oct push.
-4. **Halfway deadline 26 Oct:** at least ONE PR MERGED to clear the playbook move-#3 floor. Three merged would match the Keeperhub bursar cadence.
+1. **Today (Mon Nov 3):** #255 comment (5 min, no fork). Fastest action.
+2. **Tue Nov 4:** #98 PR + #372 PR + #367 PR in one sitting (~2h total).
+3. **Thu Nov 7 (halfway):** If #98 has merged, open #43 the same day. Minimum floor: ≥1 PR MERGED or ≥3 opened and under review by Nov 7.
+4. **Mon Nov 10 (T-48h recording lock):** Snapshot the merge state into the SUBMISSION paragraph. Whatever has not merged by this moment is cited as "filed, under review" per `[[feedback_fact_check_public_posts]]`.
 
 ## Why five is the floor, not the ceiling
 
