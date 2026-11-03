@@ -4,23 +4,18 @@
   "regions": ["iad1"],
   "functions": {
     "app/api/paypal/webhook/route.ts": {
-      "runtime": "nodejs20.x",
       "maxDuration": 30
     },
     "app/api/ap2/verify/route.ts": {
-      "runtime": "nodejs20.x",
       "maxDuration": 15
     },
     "app/api/orchestrator/sessions/route.ts": {
-      "runtime": "nodejs20.x",
       "maxDuration": 10
     },
     "app/api/orchestrator/sessions/seed/route.ts": {
-      "runtime": "nodejs20.x",
       "maxDuration": 10
     },
     "app/api/mandate/receipt/[paymentMandateId]/route.ts": {
-      "runtime": "nodejs20.x",
       "maxDuration": 10
     }
   },
