@@ -4,7 +4,7 @@ _Last updated 03 Nov 2026 — Day 30 of 42. Playbook move #3 halfway redefined: 
 
 One table, one truth. Each row is a drafted upstream artefact, its current state, and the exact command the user runs to move it one step. Updated at every commit that touches `docs/upstream-prs/`.
 
-**Current reality (2026-11-03):** All 5 drafts remain DRAFTED. Zero opened. Target repos verified open via `gh api`. See [`../UPSTREAM_PR.md`](../UPSTREAM_PR.md) for the owner action plan.
+**Current reality (2026-11-03):** 1/5 posted (AP2 #255 ecosystem comment). 4 drafts remain for `gh pr create`. Target repos verified open via `gh api`. See [`../UPSTREAM_PR.md`](../UPSTREAM_PR.md) for the owner action plan.
 
 ## State machine
 
@@ -22,7 +22,7 @@ DRAFTED → OPENED → UNDER_REVIEW → MERGED
 | 2 | **`paypal/agent-toolkit#43`** | @gordonchanhk | `api-m.` CDN-managed domain | DRAFTED (depends on #98 to land first) | After #98 merges, apply this |
 | 3 | **`google-agentic-commerce/AP2#372`** | @vicentewolde | `cnf.jwk` enum serialisation | DRAFTED | `gh pr create` per `ap2-372/README.md` |
 | 4 | **`google-agentic-commerce/AP2#367`** | @sunruize93-cmyk | `ReceiptClient` optional-callback crash | DRAFTED | `gh pr create` per `ap2-367/README.md` |
-| 5 | **`google-agentic-commerce/AP2#255`** | @hilarl | on-chain settlement comment | DRAFTED (comment, not PR) | `gh issue comment 255` per `ap2-255-comment/README.md` |
+| 5 | **`google-agentic-commerce/AP2#255`** | @hilarl | on-chain settlement comment | ✅ **POSTED 2026-11-03** — [comment-6598336168](https://github.com/google-agentic-commerce/AP2/issues/255#issuecomment-6598336168) | — |
 
 ## One-line commands
 
