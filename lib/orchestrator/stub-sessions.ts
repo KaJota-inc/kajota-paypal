@@ -18,6 +18,7 @@ export function buildStubSession(index: number): Session {
   const now = Date.now();
   const createdAt = new Date(now - (index + 1) * 7 * 60 * 1000).toISOString();
   const updatedAt = new Date(now - index * 60 * 1000).toISOString();
+  const slot = (index + 1).toString().padStart(4, "0");
 
   const gross = BigInt(1_000_000 + index * 500_000); // $1.00 .. $N.00 PYUSD (6 decimals)
   const shares = [1_000, 2_000, 7_000]; // affiliate 10%, agent 20%, merchant 70%
@@ -65,10 +66,10 @@ export function buildStubSession(index: number): Session {
       .padEnd(64, "0")}` as Hex;
 
   const base: Session = {
-    paymentMandateId: `pm_stub_${randomUUID()}`,
-    paypalOrderId: `PP_STUB_${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`,
-    cartMandateHash: `stub_cart_${randomUUID().slice(0, 8)}`,
-    paymentMandateContentsHash: `stub_pmc_${randomUUID().slice(0, 8)}`,
+    paymentMandateId: `pm_stub_${slot}`,
+    paypalOrderId: `PP_STUB_${slot}${slot.repeat(2)}`,
+    cartMandateHash: `stub_cart_${slot}`,
+    paymentMandateContentsHash: `stub_pmc_${slot}`,
     grossAmountMinorUnits: gross.toString(),
     currency: "USD",
     merchantName: `Demo Merchant ${index + 1} (stub)`,
