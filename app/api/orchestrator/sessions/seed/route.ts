@@ -131,7 +131,7 @@ function buildStubSession(index: number): Session {
       depositTxHash: undefined,
       depositId: undefined,
       errorReason:
-        "demo — cosellEscrowV2Pyusd not deployed yet (expected in Phase A day 4)",
+        "demo — cosellEscrowV2Pyusd deployment pending a funded Arb Sepolia EOA + Paxos PYUSD faucet; happy-path reproducer at scripts/reproduce-paypal-mesh-flow.ts stops at this same step",
     };
   }
   return base;

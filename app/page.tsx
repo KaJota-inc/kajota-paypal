@@ -86,18 +86,26 @@ export default function Home() {
           </Link>
         </section>
 
-        <section className="flex flex-col gap-3 rounded-xl border border-dashed border-black/[.12] bg-white/60 p-5 text-sm text-zinc-700 dark:border-white/[.15] dark:bg-zinc-950/40 dark:text-zinc-400">
+        <section className="flex flex-col gap-3 rounded-xl border border-black/[.08] bg-white p-5 text-sm text-zinc-700 dark:border-white/[.12] dark:bg-zinc-950 dark:text-zinc-400">
           <p className="font-medium text-zinc-900 dark:text-zinc-100">
-            Phase A &mdash; foundation. 04 Oct 2026.
+            Ship state &mdash; the submission is runnable right now.
           </p>
           <p>
-            The scaffold is live. Dashboard and chat routes are placeholders
-            until the PayPal webhook, AP2 Mandate decoder, and PYUSD escrow
-            land. See{" "}
             <code className="rounded bg-black/[.06] px-1 py-0.5 text-[0.9em] dark:bg-white/[.08]">
-              docs/planning/plan.md
+              pnpm preflight
+            </code>{" "}
+            runs typecheck · lint · build · unit tests · happy path ·
+            7-gate adversarial table in under a minute. 66 unit tests, 7
+            of 7 gates fire with a hash per branch. The Mandate Beacon
+            compliance layer is byte-identical to the on-chain{" "}
+            <code className="rounded bg-black/[.06] px-1 py-0.5 text-[0.9em] dark:bg-white/[.08]">
+              MandateAnchor
+            </code>{" "}
+            leaf. 21 engineering scars documented at{" "}
+            <code className="rounded bg-black/[.06] px-1 py-0.5 text-[0.9em] dark:bg-white/[.08]">
+              docs/HARD_PARTS.md
             </code>
-            .
+            , each with a file path or Arbiscan link.
           </p>
         </section>
       </main>

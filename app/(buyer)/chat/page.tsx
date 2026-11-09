@@ -105,8 +105,10 @@ export default function BuyerChatPage() {
         <p className="max-w-2xl text-sm leading-6 text-zinc-600 dark:text-zinc-400">
           Prompt the agent. It calls Channel3 for discovery, assembles an AP2
           Cart Mandate, triggers PayPal checkout, and settles the fan-out
-          through Mesh. Phase A is a scripted mock stream; swap to live
-          Vercel AI SDK + OpenAI drops in behind the same event schema.
+          through Mesh. The trace streams a deterministic eight-stage
+          pipeline so the surface is legible even without live keys; drop
+          in Vercel AI SDK + OpenAI + a real Channel3 token and the same
+          event schema carries real tool calls.
         </p>
       </header>
 

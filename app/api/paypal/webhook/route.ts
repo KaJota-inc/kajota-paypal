@@ -248,6 +248,6 @@ export async function GET() {
     endpoint: "/api/paypal/webhook",
     accepts: "POST application/json with PayPal transmission headers",
     phase_note:
-      "Phase A — signature verification works against sandbox when PAYPAL_WEBHOOK_ID is set. Deposit throws until cosellEscrowV2Pyusd is populated.",
+      "Signature verification works against the PayPal sandbox when PAYPAL_WEBHOOK_ID is set. The on-chain deposit path waits on a funded Arb Sepolia EOA + Paxos PYUSD faucet; everything upstream of the escrow write (schema, jose.jwtVerify, cart_hash, payment_details_id cross-ref, cart_expiry, Beacon receipt, projection) runs end-to-end regardless.",
   });
 }

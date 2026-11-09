@@ -185,6 +185,6 @@ export async function GET() {
     accepts: "POST application/json { prompt?: string }",
     streams: "text/event-stream; data: { ChatEvent }",
     phase_note:
-      "Phase A — scripted mock. Phase B swap drops in Vercel AI SDK streamText with the same event schema.",
+      "Deterministic eight-stage trace — scripted so the surface is legible without live keys. Drop in Vercel AI SDK streamText + OpenAI + a real Channel3 token and the same ChatEvent schema carries real tool calls.",
   });
 }
