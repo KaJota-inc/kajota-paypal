@@ -1,5 +1,6 @@
-import { randomUUID } from "crypto";
+import { createHash, randomUUID } from "crypto";
 import type { Hex } from "viem";
+import type { BeaconReceipt, BeaconStatus } from "@/lib/beacon/types";
 import type { Session, SessionRecipient, SettlementStatus } from "./sessions";
 
 /**
@@ -82,12 +83,17 @@ export function buildStubSession(index: number): Session {
     depositId: stubTx("deposit-id"),
   };
 
+  const withReceipt: Session = {
+    ...base,
+    beaconReceipt: buildStubBeaconReceipt(base, status),
+  };
+
   if (status === "released") {
-    return { ...base, releaseTxHash: stubTx("release") };
+    return { ...withReceipt, releaseTxHash: stubTx("release") };
   }
   if (status === "failed") {
     return {
-      ...base,
+      ...withReceipt,
       listingId: undefined,
       registerTxHash: undefined,
       approveTxHash: undefined,
@@ -97,7 +103,69 @@ export function buildStubSession(index: number): Session {
         "demo — cosellEscrowV2Pyusd deployment pending a funded Arb Sepolia EOA + Paxos PYUSD faucet; happy-path reproducer at scripts/reproduce-paypal-mesh-flow.ts stops at this same step",
     };
   }
-  return base;
+  return withReceipt;
+}
+
+/**
+ * Compute a deterministic-shaped Beacon receipt for a stub session so the
+ * `/mandate-inspector/[paymentMandateId]` surface renders a real-looking
+ * compliance-receipt card without the full AP2 Mandate pair. Commitment
+ * fields are sha-256 derivations of the stub session's own payment id —
+ * reproducible, labelled, and never claimed to be on-chain (no
+ * `anchorTxHash`).
+ */
+function buildStubBeaconReceipt(
+  base: Session,
+  status: SettlementStatus,
+): BeaconReceipt {
+  const hex32 = (tag: string): Hex =>
+    `0x${createHash("sha256")
+      .update(`${tag}:${base.paymentMandateId}`)
+      .digest("hex")}` as Hex;
+
+  const postedAtSeconds = Math.floor(
+    Date.parse(base.createdAt) / 1000,
+  );
+  const slaWindowSeconds = 864_000; // Reg E 10 business days
+
+  const beaconStatus: BeaconStatus =
+    status === "released"
+      ? "settled"
+      : status === "failed"
+        ? "sla-breached"
+        : "posted";
+
+  return {
+    commitment: hex32("commitment"),
+    paymentMandateContentsHash: base.paymentMandateContentsHash,
+    cartMandateHashBase64Url: base.cartMandateHash,
+    mandateId: hex32("mandate-id"),
+    idempotencyKey: hex32("idempotency-key"),
+    envelopeHash: hex32("envelope-hash"),
+    merchantAddress:
+      (base.recipients.find((r) => r.role === "merchant")?.address ??
+        "0x742d35Cc6634C0532925a3b844Bc9e7595f8bEb6") as Hex,
+    amountMinorUnits: base.grossAmountMinorUnits,
+    currency: base.currency,
+    postedAt: postedAtSeconds,
+    deadline: postedAtSeconds + slaWindowSeconds,
+    slaWindowSeconds,
+    slaRegime: "reg-e-10bd",
+    sanctionsSnapshot: {
+      list: "ofac-sdn",
+      publishedAt: "2026-11-01",
+      digest: hex32("sanctions"),
+    },
+    occurrence: 1,
+    status: beaconStatus,
+    statusReason:
+      status === "released"
+        ? "Demo stub — settlement row seeded for the merchant dashboard."
+        : status === "failed"
+          ? "Demo stub — escrow not deployed; see errorReason on the session."
+          : "Demo stub — in-flight toward a released state.",
+    computedAt: new Date().toISOString(),
+  };
 }
 
 /** Default stub-row count used both by the explicit seed route and warm-seed. */
