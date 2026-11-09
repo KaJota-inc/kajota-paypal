@@ -4,7 +4,7 @@ _Last updated 03 Nov 2026 — Day 30 of 42. Playbook move #3 halfway redefined: 
 
 One table, one truth. Each row is a drafted upstream artefact, its current state, and the exact command the user runs to move it one step. Updated at every commit that touches `docs/upstream-prs/`.
 
-**Current reality (2026-11-03):** 1/5 posted (AP2 #255 ecosystem comment). 4 drafts remain for `gh pr create`. Target repos verified open via `gh api`. See [`../UPSTREAM_PR.md`](../UPSTREAM_PR.md) for the owner action plan.
+**Current reality (2026-11-09, T-72h):** 1/5 landed (AP2 #255 ecosystem comment). **Four drafts RETIRED as semantic dupes of PRs already open upstream** — see worktree root `UPSTREAM_PR_paypal_agent_toolkit.md`, `UPSTREAM_PR_ap2_372.md`, `UPSTREAM_PR_ap2_367.md`. Playbook move #3 lands at 1/1 honest-engagement (the comment) + 4/4 retired-as-dupe with the upstream contributors acknowledged in the submission's honest ledger. Do NOT open a fifth PR for a dupe fix — PR-farming, not signal.
 
 ## State machine
 
@@ -16,12 +16,12 @@ DRAFTED → OPENED → UNDER_REVIEW → MERGED
 
 ## The five drafts
 
-| # | Repo / target | Author of issue | Fix shape | State | Action |
+| # | Repo / target | Author of issue | Fix shape | State | Note |
 |---|---|---|---|---|---|
-| 1 | **`paypal/agent-toolkit#98`** | @aurumflux20 | per-call `PayPal-Request-Id` override | DRAFTED | `pnpm run open:98` or see `paypal-agent-toolkit-98/README.md` |
-| 2 | **`paypal/agent-toolkit#43`** | @gordonchanhk | `api-m.` CDN-managed domain | DRAFTED (depends on #98 to land first) | After #98 merges, apply this |
-| 3 | **`google-agentic-commerce/AP2#372`** | @vicentewolde | `cnf.jwk` enum serialisation | DRAFTED | `gh pr create` per `ap2-372/README.md` |
-| 4 | **`google-agentic-commerce/AP2#367`** | @sunruize93-cmyk | `ReceiptClient` optional-callback crash | DRAFTED | `gh pr create` per `ap2-367/README.md` |
+| 1 | **`paypal/agent-toolkit#98`** | @aurumflux20 | per-call `PayPal-Request-Id` override | ❌ **RETIRED 2026-11-09** — dupe of [#108](https://github.com/paypal/agent-toolkit/pull/108) (@PRIEST099) + [#124](https://github.com/paypal/agent-toolkit/pull/124) (@NovaCorpAI) | See `../../UPSTREAM_PR_paypal_agent_toolkit.md` |
+| 2 | **`paypal/agent-toolkit#43`** | @gordonchanhk | `api-m.` CDN-managed domain | ❌ **RETIRED 2026-11-09** — dupe of [#99](https://github.com/paypal/agent-toolkit/pull/99) (@GANESH-NADKARNI) | See `../../UPSTREAM_PR_paypal_agent_toolkit.md` |
+| 3 | **`google-agentic-commerce/AP2#372`** | @vicentewolde | `cnf.jwk` enum serialisation | ❌ **RETIRED 2026-11-09** — dupe of [#385](https://github.com/google-agentic-commerce/AP2/pull/385) (@aksharprabhudesai) + [#383](https://github.com/google-agentic-commerce/AP2/pull/383) + [#355](https://github.com/google-agentic-commerce/AP2/pull/355) | See `../../UPSTREAM_PR_ap2_372.md` |
+| 4 | **`google-agentic-commerce/AP2#367`** | @sunruize93-cmyk | `ReceiptClient` optional-callback crash | ❌ **RETIRED 2026-11-09** — dupe of [#384](https://github.com/google-agentic-commerce/AP2/pull/384) (@aksharprabhudesai) | See `../../UPSTREAM_PR_ap2_367.md` |
 | 5 | **`google-agentic-commerce/AP2#255`** | @hilarl | on-chain settlement comment | ✅ **POSTED 2026-11-03** — [comment-6598336168](https://github.com/google-agentic-commerce/AP2/issues/255#issuecomment-6598336168) | — |
 
 ## One-line commands
