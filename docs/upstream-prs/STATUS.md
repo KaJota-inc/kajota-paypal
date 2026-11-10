@@ -4,7 +4,7 @@ _Last updated 03 Nov 2026 — Day 30 of 42. Playbook move #3 halfway redefined: 
 
 One table, one truth. Each row is a drafted upstream artefact, its current state, and the exact command the user runs to move it one step. Updated at every commit that touches `docs/upstream-prs/`.
 
-**Current reality (2026-11-09, T-72h):** 1/5 landed (AP2 #255 ecosystem comment). **Four drafts RETIRED as semantic dupes of PRs already open upstream** — see worktree root `UPSTREAM_PR_paypal_agent_toolkit.md`, `UPSTREAM_PR_ap2_372.md`, `UPSTREAM_PR_ap2_367.md`. Playbook move #3 lands at 1/1 honest-engagement (the comment) + 4/4 retired-as-dupe with the upstream contributors acknowledged in the submission's honest ledger. Do NOT open a fifth PR for a dupe fix — PR-farming, not signal.
+**Current reality (2026-11-10, T-58h):** 2/5 landed — AP2 #255 ecosystem comment POSTED, plus `paypal/agent-toolkit#126` opened as DRAFT proposing `request_mesh_fanout_quote` as the 43rd tool (capability-shaped, not dupe — new tool with design doc + scope-options list). Four bug-fix drafts remain RETIRED as semantic dupes. Playbook move #3 lands at 1 posted comment + 1 open Draft PR for a net-new capability + 4 retired-as-dupe with upstream credit in the honest ledger.
 
 ## State machine
 

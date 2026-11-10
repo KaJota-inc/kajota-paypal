@@ -28,7 +28,7 @@ Runnable, not prose. `pnpm reproduce:fail` fires seven adversarial gates with a 
 
 ## Accomplishments
 
-**Five real end-to-end cycles on Arbitrum Sepolia 2026-11-10** — register → approve → deposit → release, $5 USDC fanned across 3 distinct hustler addresses in 20 on-chain transactions. Every tx linkable on Arbiscan from [`LIVE_SETTLEMENTS.md`](LIVE_SETTLEMENTS.md). Upstream: AP2#255 ecosystem comment posted; four bug-fix PR drafts honestly retired as dupes of existing contributor PRs (`#108`, `#99`, `AP2#385`, `AP2#384`).
+**Five real end-to-end cycles on Arbitrum Sepolia 2026-11-10** — register → approve → deposit → release, $5 USDC fanned across 3 distinct hustler addresses in 20 on-chain transactions. Every tx linkable on Arbiscan from [`LIVE_SETTLEMENTS.md`](LIVE_SETTLEMENTS.md). Upstream: Draft PR `paypal/agent-toolkit#126` filed proposing `request_mesh_fanout_quote` as the 43rd tool with a design doc + scope-options list; AP2#255 ecosystem comment posted.
 
 ## What we got wrong first
 

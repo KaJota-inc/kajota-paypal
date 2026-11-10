@@ -42,13 +42,15 @@ gh issue comment 108 --repo paypal/agent-toolkit --body-file UPSTREAM_PR_paypal_
 
 See the file `UPSTREAM_PR_paypal_agent_toolkit.md.comment` for the comment body (if landed separately).
 
-## If we still want a novel PayPal contribution PR
+## Novel PayPal contribution PR — LANDED
 
-Not a dupe, not a typo-fix — a **capability-shaped** addition per move #4:
+**`paypal/agent-toolkit#126` opened 2026-11-10 as DRAFT.** Proposes `request_mesh_fanout_quote` as the 43rd tool — a bridge tool that lets an agent request the deterministic N-party split of a PayPal order's proceeds before on-chain settlement, bound to an AP2 Payment Mandate id. Capability-shaped (move #4): *"X could not do Y at all; now it can."*
 
-> **Add an `N-party fan-out` tool to the Agent Toolkit catalogue** — a draft PR + design doc proposing `fan_out_payment(payment_mandate_id, recipients, shares)` as the 43rd tool, backed by our deployed Mesh escrow on Arbitrum Sepolia. Landing-grade merge is unrealistic in 72h; filing as a draft PR with a design doc IS citable upstream engagement.
-
-That is a 4–6h sitting (toolkit scaffolding + a reference implementation calling our `/api/paypal/webhook` + tests). If time permits by Nov 10 20:00 UTC, worth filing as a Draft PR against `main`. The submission then reads *"filed a Draft PR for the 43rd tool capability — tracked at #[N]"* which IS honest even if the PR sits unmerged through judging (Dec 1-15, winners Dec 21).
+- URL: https://github.com/paypal/agent-toolkit/pull/126
+- Diff: `typescript/src/shared/mesh.ts` (new module) + 1 line in `tools.ts` + `docs/MESH_FANOUT_DESIGN.md` (design doc with hard-parts appendix, prior-art disclosure, and a 5-level Scope Options list)
+- Cites `#107` (@rushabhT3's Payouts) as complementary, not competing
+- Cites the 5 real settlements fired on 2026-11-10 as evidence the primitive works
+- Author: KaJota-inc
 
 ## Issue #43 (related — `api-m.` domain)
 
