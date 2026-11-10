@@ -23,10 +23,11 @@ export const MESH_ARBITRUM_SEPOLIA = {
   x402DepositFacilitatorUsdc: "0xdbae565ce0be455e859cd8ff42aec8ad30bbbcf9",
   x402DepositFacilitatorUsdg: "0x15f42a9f92ab72ec67fb4298f9a95a476382d0ac",
 
-  // Phase A deliverable: deploy a PYUSD-flavoured pair against the Paxos token.
-  // Placeholder: fill after `pnpm deploy:pyusd:arbitrum-sepolia` lands.
-  cosellEscrowV2Pyusd: null,
-  x402DepositFacilitatorPyusd: null,
+  // PYUSD-flavoured pair deployed 2026-11-10 against Paxos's canonical
+  // Arbitrum Sepolia PYUSD at 0x637A1259C6afd7E3AdF63993cA7E58BB438aB1B1.
+  // Same bytecode as the USDC/USDG variants — `IERC20` at construction.
+  cosellEscrowV2Pyusd: "0xde1f09351a7108c30e3cc7e59c63fe7dd5bb9a22",
+  x402DepositFacilitatorPyusd: "0xd2a4fdb6972f37276f9b6895d77f8f1090075aea",
 } as const;
 
 /**

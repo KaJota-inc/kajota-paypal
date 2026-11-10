@@ -24,11 +24,11 @@ Next.js 16 strict + AG Grid + viem + jose + PayPal Agent Toolkit. Ten verified A
 
 ## Challenges
 
-Runnable, not prose. `pnpm reproduce:fail` fires seven adversarial gates with a hash per branch (bps mismatch, duplicate recipient, swapped mandate pair, tampered cart, expired mandate, beacon replay inside TTL, sanctions-list drift). `HARD_PARTS.md` carries 21 scars, each with a file path or Arbiscan link.
+Runnable, not prose. `pnpm reproduce:fail` fires seven adversarial gates with a hash per branch. [`HARD_PARTS.md`](docs/HARD_PARTS.md) carries 21 scars, each with a file path or Arbiscan link.
 
 ## Accomplishments
 
-Five upstream artefacts queued: `paypal/agent-toolkit#98` and `#43`, `AP2#372` and `#367`, plus an on-chain-settlement comment on `AP2#255`. A GitHub Actions runner fires one end-to-end execution every six hours; `/evidence` is the public no-login ledger a judge clicks, not clones.
+**Five real end-to-end cycles on Arbitrum Sepolia 2026-11-10** — register → approve → deposit → release, $5 USDC fanned across 3 distinct hustler addresses in 20 on-chain transactions. Every tx linkable on Arbiscan from [`LIVE_SETTLEMENTS.md`](LIVE_SETTLEMENTS.md). Upstream: AP2#255 ecosystem comment posted; four bug-fix PR drafts honestly retired as dupes of existing contributor PRs (`#108`, `#99`, `AP2#385`, `AP2#384`).
 
 ## What we got wrong first
 
