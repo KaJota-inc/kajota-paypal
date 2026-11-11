@@ -5,7 +5,10 @@ import {
   MESH_ARBITRUM_SEPOLIA,
   TOKENS_ARBITRUM_SEPOLIA,
 } from "@/lib/mesh/addresses";
+import liveSettlements from "@/lib/mesh/live-settlements.json";
 import type { Session, SettlementStatus } from "@/lib/orchestrator/sessions";
+
+type LiveSettlement = (typeof liveSettlements.settlements)[number];
 
 const EXPLORER = "https://sepolia.arbiscan.io";
 const REFRESH_MS = 60_000;
@@ -110,6 +113,8 @@ export default function EvidencePage() {
           {error}
         </div>
       ) : null}
+
+      <LiveOnChainCycle />
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold tracking-tight text-black dark:text-zinc-50">
@@ -359,4 +364,122 @@ function formatMinor(minor: bigint, currency: string): string {
   const frac = minor % BigInt(1_000_000);
   const fracStr = frac.toString().padStart(6, "0").slice(0, 2);
   return `$${whole.toString()}.${fracStr} ${currency}`;
+}
+
+function LiveOnChainCycle() {
+  const totalGross = liveSettlements.settlements.reduce(
+    (acc: bigint, s: LiveSettlement) => acc + BigInt(s.grossMinorUnits),
+    BigInt(0),
+  );
+  const uniqueRecipients = new Set(
+    liveSettlements.settlements
+      .flatMap((s: LiveSettlement) => s.recipients.map((r) => r.address.toLowerCase())),
+  );
+  const perRole = new Map<string, bigint>();
+  for (const s of liveSettlements.settlements) {
+    for (const r of s.recipients) {
+      perRole.set(
+        r.role,
+        (perRole.get(r.role) ?? BigInt(0)) + BigInt(r.payoutMinorUnits),
+      );
+    }
+  }
+
+  return (
+    <section className="flex flex-col gap-3 rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-5 dark:border-emerald-400/30 dark:bg-emerald-500/10">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-black dark:text-zinc-50">
+          <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          Live on-chain cycle · {new Date(liveSettlements.firedAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
+        </h2>
+        <a
+          href="https://github.com/KaJota-inc/kajota-paypal/blob/feat/mandate-beacon-ap2-plug/LIVE_SETTLEMENTS.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-md border border-emerald-500/40 bg-white px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-500/10 dark:bg-zinc-950 dark:text-emerald-300"
+        >
+          LIVE_SETTLEMENTS.md &rarr;
+        </a>
+      </div>
+      <p className="text-sm text-zinc-700 dark:text-zinc-300">
+        <strong className="font-semibold text-black dark:text-zinc-50">
+          {liveSettlements.settlements.length} real end-to-end cycles
+        </strong>{" "}
+        on {liveSettlements.token} CosellEscrowV2 (Arbitrum Sepolia){" "}
+        {new Date(liveSettlements.firedAt).toLocaleTimeString()} —{" "}
+        <strong>{formatMinor(totalGross, "USD")}</strong> fanned across{" "}
+        <strong>{uniqueRecipients.size} distinct hustler addresses</strong>{" "}
+        in {liveSettlements.settlements.length * 4} on-chain transactions.
+        Every tx hash below is clickable on Arbiscan — click any{" "}
+        <code className="rounded bg-emerald-500/10 px-1 py-0.5 text-xs text-emerald-800 dark:text-emerald-200">
+          release
+        </code>{" "}
+        and you see three ERC-20 Transfer events in one block, one per payee.
+      </p>
+
+      <div className="grid gap-2 sm:grid-cols-3">
+        {Array.from(perRole.entries()).map(([role, amount]) => (
+          <div
+            key={role}
+            className="rounded-lg border border-black/[.06] bg-white/70 p-3 text-sm dark:border-white/[.1] dark:bg-zinc-950/60"
+          >
+            <div className="text-xs uppercase tracking-wide text-zinc-500">{role}</div>
+            <div className="font-mono text-base text-zinc-900 dark:text-zinc-100">
+              {formatMinor(amount, "USD")}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-black/[.06] bg-white dark:border-white/[.1] dark:bg-zinc-950">
+        <table className="w-full text-xs">
+          <thead className="bg-emerald-500/10 text-left uppercase tracking-wide text-emerald-800 dark:text-emerald-200">
+            <tr>
+              <th className="px-3 py-2 font-medium">#</th>
+              <th className="px-3 py-2 font-medium">Product</th>
+              <th className="px-3 py-2 font-medium">Gross</th>
+              <th className="px-3 py-2 font-medium">Register</th>
+              <th className="px-3 py-2 font-medium">Deposit</th>
+              <th className="px-3 py-2 font-medium">Release</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-black/[.05] dark:divide-white/[.08]">
+            {liveSettlements.settlements.map((s: LiveSettlement) => (
+              <tr key={s.index}>
+                <td className="px-3 py-2 text-zinc-500">{s.index}</td>
+                <td className="px-3 py-2 font-mono text-zinc-800 dark:text-zinc-200">
+                  {s.productId}
+                </td>
+                <td className="px-3 py-2 font-mono text-zinc-900 dark:text-zinc-50">
+                  {formatMinor(BigInt(s.grossMinorUnits), "USD")}
+                </td>
+                <td className="px-3 py-2">
+                  <LiveTxLink hash={s.registerTxHash} />
+                </td>
+                <td className="px-3 py-2">
+                  <LiveTxLink hash={s.depositTxHash} />
+                </td>
+                <td className="px-3 py-2">
+                  <LiveTxLink hash={s.releaseTxHash} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function LiveTxLink({ hash }: { hash: string }) {
+  return (
+    <a
+      href={`${EXPLORER}/tx/${hash}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-mono text-sky-700 hover:underline dark:text-sky-300"
+    >
+      {hash.slice(0, 8)}…{hash.slice(-6)}
+    </a>
+  );
 }

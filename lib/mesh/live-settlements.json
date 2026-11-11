@@ -1,0 +1,171 @@
+{
+  "chainId": 421614,
+  "token": "USDC",
+  "tokenAddress": "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
+  "registryV2": "0x5CdA1Ae03Fd8207cb0C7416ddc899Fe89A603EF9",
+  "escrowV2": "0xce77674eF1f3abcD34370825390F351EB6a8FFfd",
+  "firedAt": "2026-11-10T09:31:59.329Z",
+  "count": 5,
+  "settlements": [
+    {
+      "index": 1,
+      "productId": "kajota-live-2026-11-10-01",
+      "listingId": "0xdd0ee1cf2a34c2f3325d6d282d012d64246a6abb6b88857a3cf052d719470ca5",
+      "depositId": "0xcaf0c04a6cc193bc0e2a68aa0d88fe68082047a78f55040d494b2634806cf5f2",
+      "registerTxHash": "0x84d594e8fb096bfaac884d3bcb2f2c362f268f5d2c44761718a49e16e020316b",
+      "approveTxHash": "0x527c8f1cb6d3bb682c681bcde8a3826d23e9a1280f50969a0d1cd04f49fab53a",
+      "depositTxHash": "0x366308562a1222d02e02b755cc28a7b132f61e25df21dd85425cbde7cf5e0c3a",
+      "releaseTxHash": "0x8d3dd1712fb30e70956c65f0f9e81b6af2bf4bf972c8ed3ea45c6d7f522db372",
+      "grossMinorUnits": "1000000",
+      "recipients": [
+        {
+          "role": "affiliate",
+          "address": "0xA1111111111111111111111111111111111111A1",
+          "shareBps": 1000,
+          "payoutMinorUnits": "100000"
+        },
+        {
+          "role": "agent",
+          "address": "0xA2222222222222222222222222222222222222a2",
+          "shareBps": 2000,
+          "payoutMinorUnits": "200000"
+        },
+        {
+          "role": "merchant",
+          "address": "0x742d35CC6634C0532925A3b844Bc9e7595f8BEb6",
+          "shareBps": 7000,
+          "payoutMinorUnits": "700000"
+        }
+      ],
+      "firedAt": "2026-11-10T09:31:03.557Z"
+    },
+    {
+      "index": 2,
+      "productId": "kajota-live-2026-11-10-02",
+      "listingId": "0x70d5f996042e96dfa6367f7af9826668a7e74267552919bace99685807cc7972",
+      "depositId": "0x77e2c4566b41b4011ffacdab8fc9c47ff1a76e5921b496258a980c767e790d67",
+      "registerTxHash": "0x5fb018c067a14a8a4a443f12bcdd0a723b7ac463241889b49671e20dadcd7628",
+      "approveTxHash": "0x253769ff52fd24f9affa5a86d7e0da6b003fbe82b7edbd921a04925caa85a3da",
+      "depositTxHash": "0x7f3b95023119b3abddea63962fef9931b4a7ef1f2bada81ae3bcd70acabd2e94",
+      "releaseTxHash": "0x3e565956ed392a70ac8f484897709ab186f30bcebf7972a88640d604428dd643",
+      "grossMinorUnits": "1000000",
+      "recipients": [
+        {
+          "role": "affiliate",
+          "address": "0xA1111111111111111111111111111111111111A1",
+          "shareBps": 1000,
+          "payoutMinorUnits": "100000"
+        },
+        {
+          "role": "agent",
+          "address": "0xA2222222222222222222222222222222222222a2",
+          "shareBps": 2000,
+          "payoutMinorUnits": "200000"
+        },
+        {
+          "role": "merchant",
+          "address": "0x742d35CC6634C0532925A3b844Bc9e7595f8BEb6",
+          "shareBps": 7000,
+          "payoutMinorUnits": "700000"
+        }
+      ],
+      "firedAt": "2026-11-10T09:31:16.613Z"
+    },
+    {
+      "index": 3,
+      "productId": "kajota-live-2026-11-10-03",
+      "listingId": "0xeb877a472822f977b30d62e7358898ff1402aee53aa8f2d6ba7c9be924467037",
+      "depositId": "0x64654fae9fbe42c4b74001bf94f9b1f695e888ae3e1f04278d6deee4d296e836",
+      "registerTxHash": "0xe856edb02547130a08a188e8edb04e2a3f5f9272359829b772161103307c5ed1",
+      "approveTxHash": "0x9e44b30a2fbb682c1763c06b73fcd745efe336671668bb4b50892b1bf938f8d4",
+      "depositTxHash": "0x4f833c312ee41df10685a140a8d45a443fcd7ebd693af63f84013ff40e5c55cb",
+      "releaseTxHash": "0xd2160f7c5a7c28d072ea7d15b265a4df761dc24b7150de0aee16f00c45637c7b",
+      "grossMinorUnits": "1000000",
+      "recipients": [
+        {
+          "role": "affiliate",
+          "address": "0xA1111111111111111111111111111111111111A1",
+          "shareBps": 1000,
+          "payoutMinorUnits": "100000"
+        },
+        {
+          "role": "agent",
+          "address": "0xA2222222222222222222222222222222222222a2",
+          "shareBps": 2000,
+          "payoutMinorUnits": "200000"
+        },
+        {
+          "role": "merchant",
+          "address": "0x742d35CC6634C0532925A3b844Bc9e7595f8BEb6",
+          "shareBps": 7000,
+          "payoutMinorUnits": "700000"
+        }
+      ],
+      "firedAt": "2026-11-10T09:31:30.693Z"
+    },
+    {
+      "index": 4,
+      "productId": "kajota-live-2026-11-10-04",
+      "listingId": "0x2be1cbb131c47fb68b146edbcd36654a29052220fdf102ad356c01bbf43f3710",
+      "depositId": "0x6511bd4a43afdeb607da31da9082282465dfe1848863a64d8495e1a389a0cf99",
+      "registerTxHash": "0xa29ffebf33b30b82633780a5f8f6a71c9436fae74a338735e20922a438d22af2",
+      "approveTxHash": "0x7485621a4428be232f5017bd3997df871156c6a0e6870ec35f1c814d287e24b6",
+      "depositTxHash": "0x7efd2b2e5050161527ed146389ee76d86dec2cf2fce61b699bda6da7285449c6",
+      "releaseTxHash": "0x51653a88d11dcda298833413bca6400a22eed51a6db7af2208cdddeaed6ceb40",
+      "grossMinorUnits": "1000000",
+      "recipients": [
+        {
+          "role": "affiliate",
+          "address": "0xA1111111111111111111111111111111111111A1",
+          "shareBps": 1000,
+          "payoutMinorUnits": "100000"
+        },
+        {
+          "role": "agent",
+          "address": "0xA2222222222222222222222222222222222222a2",
+          "shareBps": 2000,
+          "payoutMinorUnits": "200000"
+        },
+        {
+          "role": "merchant",
+          "address": "0x742d35CC6634C0532925A3b844Bc9e7595f8BEb6",
+          "shareBps": 7000,
+          "payoutMinorUnits": "700000"
+        }
+      ],
+      "firedAt": "2026-11-10T09:31:45.241Z"
+    },
+    {
+      "index": 5,
+      "productId": "kajota-live-2026-11-10-05",
+      "listingId": "0x192f6a3319ea61ffcc86d4fc1b505dfc63804de32d75004e14b8ffda57e5897b",
+      "depositId": "0xbe6e1cd06709454ad5a2053586c7340dc92ddef8ad66ab1478767ce11bfb8472",
+      "registerTxHash": "0x28b54bca24d9c54eb746db0d9d63ee0260808d76332bac9e2411053f7ff36b67",
+      "approveTxHash": "0xb8cd07390b2caf60f7a9d5e02eb0e866ab4816343567ce282da5502d796ca31a",
+      "depositTxHash": "0xe1dfde609fcae661b1a53df09e29f258d7dcf689311d7d31c3c6978743cad529",
+      "releaseTxHash": "0x3b6f1eaa7172d12f9227f2d247367711384f828974a879d2e38b2ddeb1ad64f3",
+      "grossMinorUnits": "1000000",
+      "recipients": [
+        {
+          "role": "affiliate",
+          "address": "0xA1111111111111111111111111111111111111A1",
+          "shareBps": 1000,
+          "payoutMinorUnits": "100000"
+        },
+        {
+          "role": "agent",
+          "address": "0xA2222222222222222222222222222222222222a2",
+          "shareBps": 2000,
+          "payoutMinorUnits": "200000"
+        },
+        {
+          "role": "merchant",
+          "address": "0x742d35CC6634C0532925A3b844Bc9e7595f8BEb6",
+          "shareBps": 7000,
+          "payoutMinorUnits": "700000"
+        }
+      ],
+      "firedAt": "2026-11-10T09:31:58.736Z"
+    }
+  ]
+}
