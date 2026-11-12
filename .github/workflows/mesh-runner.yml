@@ -69,15 +69,18 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Guard — webhook URL set
+        id: guard
         run: |
           if [ -z "$MESH_WEBHOOK_URL" ]; then
-            echo "::warning::MESH_WEBHOOK_URL is not set — the runner needs a deployed webhook to accumulate executions."
-            echo "::warning::Set it with: gh secret set MESH_WEBHOOK_URL --body 'https://kajota-paypal.vercel.app/api/paypal/webhook'"
-            exit 0
+            echo "::warning::MESH_WEBHOOK_URL is not set — skipping the fire step. Set it with: gh secret set MESH_WEBHOOK_URL --body 'https://kajota-paypal.vercel.app/api/paypal/webhook'"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Fire one stub-signed Mandate pair at the webhook
         id: fire
+        if: steps.guard.outputs.skip != 'true'
         run: pnpm tsx scripts/runner/fire-stub-webhook.ts
 
       - name: Summary
