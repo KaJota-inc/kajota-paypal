@@ -24,22 +24,29 @@ export type MeshDeposit = {
   state: DepositState;
 };
 
+// The settlement escrow/token used by the live webhook. Points at the
+// USDC-flavoured CosellEscrowV2 so the every-6h GH-Actions runner can
+// fire real on-chain cycles against a wallet with a funded balance —
+// Paxos's Arbitrum Sepolia PYUSD testnet faucet has a human-verification
+// gate (see LIVE_SETTLEMENTS.md "Why USDC not PYUSD"). The escrow
+// bytecode is IERC20-polymorphic (HARD_PARTS scar #8), so swapping to
+// the PYUSD pair is a one-line flip once PYUSD funding lands.
+const SETTLEMENT_ESCROW = MESH_ARBITRUM_SEPOLIA.cosellEscrowV2Usdc;
+const SETTLEMENT_TOKEN = TOKENS_ARBITRUM_SEPOLIA.usdc;
+
 /**
- * Approve PYUSD, then call `CosellEscrowV2(PYUSD).deposit(listingId, grossAmount)`.
- * Returns the `depositId` extracted from the `Deposited` event.
- *
- * Phase A: the PYUSD escrow pair address is not yet set in
- * `addresses.ts` — this function throws until deployment lands. The call
- * surface is in place so the webhook route can import it today.
+ * Approve the settlement token, then call
+ * `CosellEscrowV2.deposit(listingId, grossAmount)`. Returns the `depositId`
+ * extracted from the `Deposited` event.
  */
 export async function depositPyusd(args: {
   listingId: Hex;
   grossAmount: bigint;
 }): Promise<{ depositId: Hex; approveTxHash: Hex; depositTxHash: Hex }> {
-  const escrow = MESH_ARBITRUM_SEPOLIA.cosellEscrowV2Pyusd;
+  const escrow = SETTLEMENT_ESCROW;
   if (!escrow) {
     throw new Error(
-      "cosellEscrowV2Pyusd not deployed yet — see Phase A day 4 in docs/planning/plan.md",
+      "SETTLEMENT_ESCROW not deployed yet — see Phase A day 4 in docs/planning/plan.md",
     );
   }
 
@@ -47,7 +54,7 @@ export async function depositPyusd(args: {
   const client = publicArbSepolia();
 
   const approveTxHash = await wallet.writeContract({
-    address: TOKENS_ARBITRUM_SEPOLIA.pyusd,
+    address: SETTLEMENT_TOKEN,
     abi: ERC20_MIN_ABI,
     functionName: "approve",
     args: [escrow, args.grossAmount],
@@ -81,9 +88,9 @@ export async function depositPyusd(args: {
 
 /** Trigger the N-way fan-out. Only the release-auth wallet can call this. */
 export async function releaseDeposit(depositId: Hex): Promise<Hex> {
-  const escrow = MESH_ARBITRUM_SEPOLIA.cosellEscrowV2Pyusd;
+  const escrow = SETTLEMENT_ESCROW;
   if (!escrow) {
-    throw new Error("cosellEscrowV2Pyusd not deployed yet");
+    throw new Error("SETTLEMENT_ESCROW not deployed yet");
   }
   const wallet = releaseAuthWallet();
   return wallet.writeContract({
@@ -95,9 +102,9 @@ export async function releaseDeposit(depositId: Hex): Promise<Hex> {
 }
 
 export async function getDeposit(depositId: Hex): Promise<MeshDeposit> {
-  const escrow = MESH_ARBITRUM_SEPOLIA.cosellEscrowV2Pyusd;
+  const escrow = SETTLEMENT_ESCROW;
   if (!escrow) {
-    throw new Error("cosellEscrowV2Pyusd not deployed yet");
+    throw new Error("SETTLEMENT_ESCROW not deployed yet");
   }
   const client = publicArbSepolia();
   const result = await client.readContract({
