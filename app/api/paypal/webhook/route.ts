@@ -22,6 +22,20 @@ import { beaconReplayStore } from "@/lib/beacon/replay-store";
 
 export const runtime = "nodejs";
 
+// Teach NextResponse.json how to serialize bigints. viem returns bigint for
+// amounts, block numbers and gas fields in receipts; settlePaypalOrder's
+// projection carries bigint grossAmount; both flow into the response body.
+// Without this polyfill NextResponse throws "Do not know how to serialize a
+// BigInt" AFTER the on-chain writes have already landed — the caller sees
+// 500 and the session is marked `failed` even though the deposit succeeded.
+if (!("toJSON" in BigInt.prototype)) {
+  (BigInt.prototype as unknown as { toJSON: () => string }).toJSON = function (
+    this: bigint,
+  ) {
+    return this.toString();
+  };
+}
+
 /**
  * Phase A webhook body shape. In production the AP2 Mandate pair arrives via
  * the PayPal Cart API's custom metadata (TBD during sandbox walk); for now
