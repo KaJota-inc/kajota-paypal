@@ -1,4 +1,10 @@
-import { createPublicClient, createWalletClient, http, type Hex } from "viem";
+import {
+  createPublicClient,
+  createWalletClient,
+  http,
+  nonceManager,
+  type Hex,
+} from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { arbitrumSepolia } from "viem/chains";
 import { serverEnv } from "@/lib/env";
@@ -27,7 +33,8 @@ export function orchestrationWallet() {
     );
   }
   const account = privateKeyToAccount(
-    env.MESH_ORCHESTRATION_PRIVATE_KEY as Hex
+    env.MESH_ORCHESTRATION_PRIVATE_KEY as Hex,
+    { nonceManager }
   );
   return createWalletClient({
     account,
@@ -49,7 +56,8 @@ export function releaseAuthWallet() {
     );
   }
   const account = privateKeyToAccount(
-    env.MESH_RELEASE_AUTH_PRIVATE_KEY as Hex
+    env.MESH_RELEASE_AUTH_PRIVATE_KEY as Hex,
+    { nonceManager }
   );
   return createWalletClient({
     account,
