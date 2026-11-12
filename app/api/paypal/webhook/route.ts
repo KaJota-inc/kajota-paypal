@@ -262,6 +262,6 @@ export async function GET() {
     endpoint: "/api/paypal/webhook",
     accepts: "POST application/json with PayPal transmission headers",
     phase_note:
-      "Signature verification works against the PayPal sandbox when PAYPAL_WEBHOOK_ID is set. The on-chain deposit path waits on a funded Arb Sepolia EOA + Paxos PYUSD faucet; everything upstream of the escrow write (schema, jose.jwtVerify, cart_hash, payment_details_id cross-ref, cart_expiry, Beacon receipt, projection) runs end-to-end regardless.",
+      "Live end-to-end on Arbitrum Sepolia USDC: a stub-signed Mandate pair POSTed here registers on CosellRegistryV2, approves + deposits on CosellEscrowV2, and returns 200 with register/approve/deposit tx hashes. Signature verification runs against the PayPal sandbox when PAYPAL_WEBHOOK_ID is set. PYUSD is a one-address swap in lib/mesh/escrow.ts once Paxos's Arb Sepolia faucet is funded; the escrow bytecode is IERC20-polymorphic (HARD_PARTS scar #8).",
   });
 }

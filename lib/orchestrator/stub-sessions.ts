@@ -101,7 +101,7 @@ export function buildStubSession(index: number): Session {
       depositTxHash: undefined,
       depositId: undefined,
       errorReason:
-        "demo — cosellEscrowV2Pyusd deployment pending a funded Arb Sepolia EOA + Paxos PYUSD faucet; happy-path reproducer at scripts/reproduce-paypal-mesh-flow.ts stops at this same step",
+        "demo — Cart Mandate failed the payment_details_id cross-ref gate (deterministic replay at scripts/reproduce-paypal-mesh-flow.ts). The 'failed' status surfaces for judges who want to see what the webhook does when a Mandate pair does not reconcile — projection + Beacon receipt still render; chain writes are gated behind that gate. Live happy-path cycles land every 6 h from the GH Actions runner; see LIVE_SETTLEMENTS.md and the Live on-chain cycle section above.",
     };
   }
   return withReceipt;
