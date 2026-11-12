@@ -1,5 +1,4 @@
 import { paypalAccessToken, paypalBaseUrl } from "./client";
-import { serverEnv } from "@/lib/env";
 
 /**
  * PayPal webhook signature headers. The signature covers the raw request
@@ -41,8 +40,13 @@ export async function verifyPaypalWebhook(
   headers: PaypalWebhookHeaders,
   rawEventBody: string,
 ): Promise<{ ok: boolean; reason?: string }> {
-  const env = serverEnv();
-  if (!env.PAYPAL_WEBHOOK_ID) {
+  // Read PAYPAL_WEBHOOK_ID directly (not via serverEnv()) so an unconfigured
+  // Vercel instance returns the skip-reason cleanly instead of throwing from
+  // the serverEnv() full-schema validation on other missing required keys.
+  // The runner's accumulating-executions path depends on this early return
+  // resolving when PAYPAL_WEBHOOK_ID is unset.
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+  if (!webhookId) {
     return {
       ok: false,
       reason: "PAYPAL_WEBHOOK_ID not configured — cannot verify signature",
@@ -71,7 +75,7 @@ export async function verifyPaypalWebhook(
       transmission_id: headers["paypal-transmission-id"],
       transmission_sig: headers["paypal-transmission-sig"],
       transmission_time: headers["paypal-transmission-time"],
-      webhook_id: env.PAYPAL_WEBHOOK_ID,
+      webhook_id: webhookId,
       webhook_event: event,
     }),
   });
