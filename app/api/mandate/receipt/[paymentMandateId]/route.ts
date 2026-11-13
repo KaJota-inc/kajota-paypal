@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sessions } from "@/lib/orchestrator/sessions";
+import { demoVerdictForMerchant } from "@/lib/concordium/demo-verdict";
 
 export const runtime = "nodejs";
 
@@ -54,5 +55,6 @@ export async function GET(
     receipt: session.beaconReceipt,
     session_status: session.status,
     inspector_url: `/mandate-inspector/${paymentMandateId}`,
+    concordium_verdict: demoVerdictForMerchant(session.merchantName),
   });
 }

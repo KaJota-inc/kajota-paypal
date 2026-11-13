@@ -41,6 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+
 # Personal PhD planning artefacts live in the private
 # imperial-york-phd repo; the MELSAN script saves daily research notes
 # here only for co-location with the thesis-anchor code. Keep them

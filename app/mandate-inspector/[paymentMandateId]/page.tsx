@@ -17,6 +17,19 @@ const BEACON_STATUS_STYLE: Record<BeaconStatus, string> = {
     "bg-rose-500/10 text-rose-700 ring-rose-400/40 dark:bg-rose-400/15 dark:text-rose-200",
 };
 
+type ConcordiumVerdict = {
+  code: string;
+  level: "info" | "caution" | "none";
+  tokenAddress: string | null;
+  owner: string | null;
+  agentUri: string | null;
+  network: "mainnet" | "testnet" | null;
+  reasons: Array<{ level: "info" | "caution"; code: string; message: string }>;
+  ownerExplorerUrl: string | null;
+  agentExplorerUrl: string | null;
+  boundKeys: { chain: string; address: string }[];
+};
+
 type ReceiptResponse =
   | {
       ok: true;
@@ -24,6 +37,7 @@ type ReceiptResponse =
       receipt: BeaconReceipt;
       session_status: SettlementStatus;
       inspector_url: string;
+      concordium_verdict?: ConcordiumVerdict;
     }
   | { ok: false; payment_mandate_id?: string; error: string };
 
@@ -144,6 +158,10 @@ export default function MandateInspectorPage({
           </p>
         ) : null}
       </header>
+
+      {data.concordium_verdict ? (
+        <ConcordiumPanel verdict={data.concordium_verdict} />
+      ) : null}
 
       <section className="grid gap-4 lg:grid-cols-2">
         <Panel
@@ -284,6 +302,121 @@ export default function MandateInspectorPage({
           </pre>
         </details>
       </section>
+    </div>
+  );
+}
+
+function ConcordiumPanel({ verdict }: { verdict: ConcordiumVerdict }) {
+  const tone =
+    verdict.level === "caution"
+      ? {
+          ring: "ring-rose-400/50",
+          dot: "bg-rose-500",
+          chip: "bg-rose-500/10 text-rose-800 dark:text-rose-200",
+          title: "Verified-by-Concordium — caution",
+        }
+      : verdict.level === "info"
+        ? {
+            ring: "ring-emerald-400/50",
+            dot: "bg-emerald-500",
+            chip: "bg-emerald-500/10 text-emerald-800 dark:text-emerald-200",
+            title: "Verified by Concordium",
+          }
+        : {
+            ring: "ring-zinc-400/40",
+            dot: "bg-zinc-400",
+            chip: "bg-zinc-500/10 text-zinc-700 dark:text-zinc-200",
+            title: "No Concordium badge for this seller",
+          };
+  return (
+    <section
+      className={`rounded-xl border bg-white p-5 ring-1 ring-inset ${tone.ring} dark:bg-zinc-950 border-black/[.08] dark:border-white/[.12]`}
+    >
+      <header className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className={`h-2 w-2 rounded-full ${tone.dot}`} />
+          <h2 className="text-sm font-semibold uppercase tracking-wide">
+            {tone.title}
+          </h2>
+        </div>
+        <span
+          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${tone.chip}`}
+        >
+          {verdict.code}
+        </span>
+      </header>
+      {verdict.reasons[0]?.message ? (
+        <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
+          {verdict.reasons[0].message}
+        </p>
+      ) : null}
+      <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+        {verdict.tokenAddress ? (
+          <ConcordiumRow
+            label="Badge (CIS-2 token addr)"
+            value={verdict.tokenAddress}
+            href={verdict.agentExplorerUrl}
+          />
+        ) : null}
+        {verdict.owner ? (
+          <ConcordiumRow
+            label="Owner account (identity-verified)"
+            value={verdict.owner}
+            href={verdict.ownerExplorerUrl}
+          />
+        ) : null}
+        {verdict.agentUri ? (
+          <ConcordiumRow
+            label="Agent card (anchored)"
+            value={verdict.agentUri}
+            href={verdict.agentUri}
+          />
+        ) : null}
+        <ConcordiumRow
+          label="Network"
+          value={verdict.network ?? "testnet"}
+        />
+        {verdict.boundKeys.length ? (
+          <ConcordiumRow
+            label="CIS-8 bound keys"
+            value={verdict.boundKeys
+              .map((k) => `${k.chain}: ${k.address.slice(0, 10)}…`)
+              .join("  ·  ")}
+          />
+        ) : null}
+      </dl>
+    </section>
+  );
+}
+
+function ConcordiumRow({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string;
+  href?: string | null;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] uppercase tracking-wide text-zinc-500">
+        {label}
+      </span>
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-mono text-xs text-sky-700 hover:underline dark:text-sky-300"
+        >
+          {value} ↗
+        </a>
+      ) : (
+        <span className="font-mono text-xs text-zinc-900 dark:text-zinc-100">
+          {value}
+        </span>
+      )}
     </div>
   );
 }
