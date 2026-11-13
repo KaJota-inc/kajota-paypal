@@ -2,6 +2,16 @@
 
 import { useCallback, useRef, useState } from "react";
 
+type ConcordiumVerdict = {
+  code: string;
+  level: "info" | "caution" | "none";
+  tokenAddress: string | null;
+  owner: string | null;
+  agentUri: string | null;
+  network: "mainnet" | "testnet" | null;
+  reasons: Array<{ level: "info" | "caution"; code: string; message: string }>;
+};
+
 type ChatEvent =
   | { type: "thought"; text: string }
   | {
@@ -11,6 +21,12 @@ type ChatEvent =
       id: string;
     }
   | { type: "tool_result"; tool: string; id: string; result: unknown }
+  | {
+      type: "concordium_verify";
+      verdict: ConcordiumVerdict;
+      ownerExplorerUrl: string | null;
+      agentExplorerUrl: string | null;
+    }
   | {
       type: "mandate";
       kind: "cart" | "payment";
@@ -210,6 +226,68 @@ function EventRow({ ev }: { ev: Row }) {
           </details>
         </Row>
       );
+    case "concordium_verify": {
+      const v = ev.verdict;
+      const dot =
+        v.level === "caution"
+          ? "bg-rose-500"
+          : v.level === "info"
+            ? "bg-emerald-500"
+            : "bg-zinc-400";
+      const chip =
+        v.level === "caution"
+          ? "bg-rose-500/10 text-rose-800 ring-rose-400/40 dark:text-rose-200"
+          : v.level === "info"
+            ? "bg-emerald-500/10 text-emerald-800 ring-emerald-400/40 dark:text-emerald-200"
+            : "bg-zinc-500/10 text-zinc-700 ring-zinc-400/40 dark:text-zinc-200";
+      return (
+        <Row dot={dot} label={`verified-by-concordium · ${v.code}`}>
+          <div className="flex flex-col gap-1.5">
+            <span
+              className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${chip}`}
+            >
+              {v.level === "caution"
+                ? "Caution — identity does not cover this payment"
+                : v.level === "info"
+                  ? "Verified by Concordium"
+                  : "No Concordium badge on this seller"}
+            </span>
+            {v.reasons[0]?.message ? (
+              <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                {v.reasons[0].message}
+              </p>
+            ) : null}
+            {v.tokenAddress || v.owner ? (
+              <div className="mt-1 flex flex-wrap gap-2 font-mono text-[11px]">
+                {v.tokenAddress && ev.agentExplorerUrl ? (
+                  <a
+                    href={ev.agentExplorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded border border-emerald-500/30 bg-emerald-500/5 px-2 py-0.5 text-emerald-800 hover:bg-emerald-500/15 dark:text-emerald-200"
+                  >
+                    badge · {v.tokenAddress.slice(0, 8)}… ↗
+                  </a>
+                ) : null}
+                {v.owner && ev.ownerExplorerUrl ? (
+                  <a
+                    href={ev.ownerExplorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded border border-sky-500/30 bg-sky-500/5 px-2 py-0.5 text-sky-800 hover:bg-sky-500/15 dark:text-sky-200"
+                  >
+                    owner · {v.owner.slice(0, 8)}… ↗
+                  </a>
+                ) : null}
+                <span className="rounded border border-zinc-500/20 px-2 py-0.5 text-zinc-600 dark:text-zinc-300">
+                  {v.network ?? "testnet"}
+                </span>
+              </div>
+            ) : null}
+          </div>
+        </Row>
+      );
+    }
     case "mandate":
       return (
         <Row dot="bg-amber-500" label={`${ev.kind} mandate · ${ev.id}`}>

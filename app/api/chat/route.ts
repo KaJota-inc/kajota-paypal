@@ -1,18 +1,22 @@
 import { randomUUID } from "node:crypto";
 
+import type { Verdict } from "@/lib/concordium/verify";
+import { ccdScanAccountUrl } from "@/lib/concordium/verify";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
  * Scripted buyer-chat SSE stream. Phase A has no live LLM — we emit a
  * deterministic sequence of events that mirrors the eight-stage pipeline
- * (DISCOVER → MANDATE → CHECKOUT → VERIFY → PROJECT → REGISTER → DEPOSIT →
- * RELEASE), so the demo video and the judge-visible /chat page work before
- * OPENAI_API_KEY lands.
+ * (DISCOVER → VERIFY-BY-CONCORDIUM → MANDATE → CHECKOUT → VERIFY → PROJECT
+ * → REGISTER → DEPOSIT → RELEASE), so the demo video and the judge-visible
+ * /chat page work before OPENAI_API_KEY lands.
  *
  * Phase B swap: replace the generator below with a Vercel AI SDK streamText
  * call that drives real tool invocations (Channel3 /v1/search, PayPal Cart
- * API, our /api/paypal/webhook). The SSE event schema stays the same so the
+ * API, our /api/paypal/webhook) and calls `verifyConcordium` with the real
+ * seller origin + x402 options. The SSE event schema stays the same so the
  * frontend does not change when the mock drops.
  */
 
@@ -25,6 +29,12 @@ type ChatEvent =
       id: string;
     }
   | { type: "tool_result"; tool: string; id: string; result: unknown }
+  | {
+      type: "concordium_verify";
+      verdict: Verdict;
+      ownerExplorerUrl: string | null;
+      agentExplorerUrl: string | null;
+    }
   | {
       type: "mandate";
       kind: "cart" | "payment";
@@ -104,6 +114,44 @@ export async function POST(req: Request) {
       push({
         type: "thought",
         text: "Picking the vintage tote at $89.99 — highest reviewer-share (15% commission) and under budget.",
+      });
+
+      // Verified by Concordium — preflight gate before the Cart Mandate.
+      // In Phase A we emit a deterministic verdict that matches the
+      // registered demo card (Kajota's own Concordium Trusted Agent
+      // record, agent #KAJOTA-DEMO on testnet). The real `verifyConcordium`
+      // call is wired via the MCP wrapper (POST /api/mcp) so the demo
+      // script can prove the live-registry path; the /chat SSE emits the
+      // cached outcome.
+      await sleep(STEP_MS);
+      push({
+        type: "thought",
+        text: "Running Verified-by-Concordium preflight on artisanleather.example before assembling the Cart Mandate.",
+      });
+      await sleep(STEP_MS * 0.7);
+      const demoAgentToken = "4WU5GvYGYZibDL7SJTGVo9xTiMjSbiHfGX8";
+      const demoOwner = "4owner0DEMO000000000000000000000000000000000000AB";
+      const demoVerdict: Verdict = {
+        code: "verified-external-key",
+        level: "info",
+        tokenAddress: demoAgentToken,
+        owner: demoOwner,
+        agentUri: "https://kajota-paypal.vercel.app/.well-known/agent-card.json",
+        network: "testnet",
+        reasons: [
+          {
+            level: "info",
+            code: "concordium_verified",
+            message:
+              "Verified by Concordium: the payout address on Base Sepolia belongs to Concordium agent #KAJOTA-DEMO, whose owner is an identity-verified account.",
+          },
+        ],
+      };
+      push({
+        type: "concordium_verify",
+        verdict: demoVerdict,
+        ownerExplorerUrl: ccdScanAccountUrl(demoOwner, "testnet"),
+        agentExplorerUrl: ccdScanAccountUrl(demoAgentToken, "testnet"),
       });
 
       const cartMandateId = `cm_${randomUUID()}`;

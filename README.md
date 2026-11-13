@@ -104,6 +104,80 @@ Open http://localhost:3000, then click `/chat` → `Run`, or `/dashboard` → `S
 - [`docs/DEMO_VIDEO.md`](docs/DEMO_VIDEO.md) — three-minute video beat sheet
 - [`docs/planning/pitch.md`](docs/planning/pitch.md), [`docs/planning/plan.md`](docs/planning/plan.md), [`docs/planning/scout.md`](docs/planning/scout.md), [`docs/planning/mandate-beacon-reuse-brief.md`](docs/planning/mandate-beacon-reuse-brief.md) — kick-off artefacts
 
+## Verified by Concordium
+
+The Concordium Trusted Agents layer (Encode Club × Concordium, Dec 9 2026
+deadline) bolts an accountability record onto the already-shipped Kajota
+buyer agent. One line summary: the Kajota agent is registered on
+Concordium's Agent Registry, its Agent Card hash is pinned on chain, and
+its Base + Arb Sepolia payout keys are bound via CIS-8 — so a merchant
+can see *"Verified by Concordium — verified-external-key"* before any
+PayPal order fires.
+
+**Four CCDScan testnet transactions:** see
+[`concordium/ccdscan-links.md`](concordium/ccdscan-links.md) for the live
+hashes.
+
+| # | Transaction | CCDScan |
+|---|---|---|
+| 1 | Register Agent Card (Agent Registry mint) | [testnet.ccdscan.io](https://testnet.ccdscan.io/) — see `ccdscan-links.md` |
+| 2 | Pin Agent Card hash (metadata_hash on chain) | [testnet.ccdscan.io](https://testnet.ccdscan.io/) — see `ccdscan-links.md` |
+| 3 | Bind Base Sepolia key via CIS-8 | [testnet.ccdscan.io](https://testnet.ccdscan.io/) — see `ccdscan-links.md` |
+| 4 | x402 testnet payment with sponsored fees | [testnet.ccdscan.io](https://testnet.ccdscan.io/) — see `ccdscan-links.md` |
+
+### Demo script
+
+```bash
+node concordium/demo.mjs
+```
+
+Runs the four-case preflight (direct analogue of Fizzl13/x402-doctor PR
+#508): Kajota's own buyer agent paid; a copycat server, a payTo swap,
+and a revoked-badge card all refused. Matches the integration-depth
+dimension Concordium scores on.
+
+### Verification states
+
+The `concordium.verify` MCP tool and the on-page preflight return the
+same four-state taxonomy (Fizzl13 PR #509 parity):
+
+- `verified-external-key` — payTo is the key the agent bound via CIS-8 → pay
+- `endpoint-unlisted` — card doesn't list this origin → refuse
+- `mismatch` — payTo is not the agent's registered wallet → refuse
+- `revoked` — registry no longer lists the agent as Active → refuse
+
+Plus `verified-wallet`, `owner-only`, `not-bound`, `card-mismatch`,
+`no-agent-wallet`, `not-read` for the remainder of the exhaustive set,
+and the cross-day diff `payto_changed_bound` (info) vs `payto_changed`
+(caution) for a rotated payTo. See
+[`lib/concordium/verify.ts`](lib/concordium/verify.ts).
+
+### Registry census snapshot
+
+See [`concordium/registry-census.md`](concordium/registry-census.md).
+
+### Path to production
+
+- The `/chat` buyer agent gates on the Concordium verdict before PayPal
+  checkout fires. A `caution` stops the pipeline.
+- The `/mandate-inspector/:id` surface annotates every verdict with the
+  Concordium panel (badge, owner, CCDScan links, CIS-8 bound keys).
+- The `/api/mcp` endpoint wraps `verifyConcordium` + `buyer_chat.plan`
+  as a Streamable-HTTP MCP so another agent — or the Concordium testnet
+  Agent Registry MCP itself — can call Kajota by its Agent Card.
+- Kajota's `/.well-known/agent-card.json` is the A2A Agent Card another
+  agent fetches before paying, carrying the Concordium badge extension.
+
+### Hackathon submission
+
+Four integration goals, all covered:
+
+- **Verified by Concordium badge** → `/mandate-inspector/*` panel + `/chat` preflight
+- **ERC-8004 Agent Card in Concordium Registry** → Agent Card pinned via
+  CIS-8 key binding to the existing Base + Arb-Sepolia keys
+- **x402 testnet with sponsored fees** → `concordium/x402-pay.mjs`
+- **MCP wrapper** → `/api/mcp` with `buyer_chat.plan` + `concordium.verify`
+
 ## Licence
 
 [MIT](LICENSE) — the licence is visible in the repository root for Devpost submission compliance.
