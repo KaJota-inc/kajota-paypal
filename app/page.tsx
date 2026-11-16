@@ -21,6 +21,21 @@ export default function Home() {
             </span>
             .
           </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 font-medium text-emerald-800 dark:text-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Verified by Concordium
+            </span>
+            <span className="text-zinc-500 dark:text-zinc-400">
+              Agent Card pinned, CIS-8 key bound to Base &amp; Arb Sepolia &mdash;{" "}
+              <a
+                href="/.well-known/agent-card.json"
+                className="underline hover:text-zinc-700 dark:hover:text-zinc-200"
+              >
+                /.well-known/agent-card.json
+              </a>
+            </span>
+          </div>
         </header>
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

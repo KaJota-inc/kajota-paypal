@@ -21,7 +21,7 @@
 //
 // Env:
 //   CONCORDIUM_REGISTRY_MCP — override the testnet registry endpoint
-//                             (default: https://testnet-agent-registry.concordium.com/mcp)
+//                             (default: https://agent-registry-mcp.concordium.com/mcp)
 
 import { createHash } from "node:crypto";
 
